@@ -9,20 +9,66 @@
 </head>
 
 <body>
-  
+
   <div class="app-container">
-    
+    <!-- VIEW 0: MÀN HÌNH ĐĂNG NHẬP / ĐĂNG KÝ -->
+    <div class="view-screen" id="auth-view">
+      <div class="auth-card">
+        <h1 class="game-title">🍺 QUÁN NHẬU VUI VẺ</h1>
+        <p class="auth-subtitle">Đăng nhập tài khoản để đồng bộ tiến trình</p>
+
+        <div class="auth-tabs">
+          <button class="auth-tab-btn active" id="tab-login-btn">Đăng Nhập</button>
+          <button class="auth-tab-btn" id="tab-register-btn">Đăng Ký</button>
+        </div>
+
+        <form id="auth-form" onsubmit="return false;">
+          <div class="input-group">
+            <label>Tên đăng nhập</label>
+            <input type="text" id="auth-username" placeholder="Nhập tên đăng nhập (VD: charlie, admin)" required
+              autocomplete="username">
+          </div>
+          <div class="input-group">
+            <label>Mật khẩu</label>
+            <input type="password" id="auth-password" placeholder="Mật khẩu (ít nhất 6 ký tự)" required
+              autocomplete="current-password">
+          </div>
+
+          <div class="auth-error hidden" id="auth-error-msg"></div>
+
+          <button type="submit" class="start-day-btn" id="auth-submit-btn">🔑 ĐĂNG NHẬP</button>
+          <!-- BỔ SUNG: Nút Đăng nhập bằng Google -->
+          <div style="text-align: center; margin: 10px 0; color: #aaa; font-size: 0.78rem;">hoặc</div>
+          <button type="button" class="google-login-btn" id="auth-google-btn">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" width="18">
+            Đăng nhập bằng Google
+          </button>
+        </form>
+      </div>
+    </div>
     <!-- VIEW 1: TRANG CHỦ (ĐÃ TỐI ƯU CẤU TRÚC LẠI) -->
     <div class="view-screen" id="home-view">
       <!-- KHUNG TÊN GAME & THÔNG SỐ GỌN GÀNG -->
       <div class="home-header-frame">
         <h1 class="game-title">🍺 QUÁN NHẬU VUI VẺ</h1>
-        <div class="stats-row">
-          <div class="stat-pill coin-pill">🪙 <span id="home-coins">0</span> Coin</div>
+
+        <!-- BỔ SUNG: Thanh thông tin người dùng -->
+        <div class="user-account-bar">
+          <span>👤 Tài khoản: <b id="user-display-name">...</b> <span id="admin-badge"
+              class="admin-badge hidden">ADMIN</span></span>
+          <button class="logout-btn" id="logout-btn">🚪 Đăng xuất</button>
+        </div>
+
+        <div class="stats-row" style="margin-top: 8px;">
+          <div class="stat-pill coin-pill"><img src="assets/icon/coin.png" class="coin-icon" alt="Coin"> <span
+              id="home-coins">0</span> Coin</div>
           <div class="stat-pill day-pill">📅 <span id="home-day">Ngày 1</span></div>
         </div>
+
+        <!-- BỔ SUNG: Nút Bảng Quản trị Admin (Chỉ hiện nếu là Admin) -->
+        <button class="admin-panel-btn hidden" id="open-admin-btn">⚙️ BẢNG QUẢN TRỊ ADMIN</button>
       </div>
-      
+
       <!-- KHU VỰC CÁC NÚT BẤM CHÍNH TRÊN TRANG CHỦ -->
       <!-- Trong div class="home-main-actions" -->
       <div class="home-main-actions">
@@ -33,7 +79,7 @@
             <span class="sub">Mua thêm ly & bom bia</span>
           </div>
         </button>
-        
+
         <!-- THÊM NÚT NHÂN SỰ VÀO ĐÂY -->
         <button class="home-menu-btn staff-menu-btn" id="open-staff-btn">
           <span class="btn-icon">👔</span>
@@ -42,7 +88,7 @@
             <span class="sub">Tuyển & quản lý nhân viên</span>
           </div>
         </button>
-        
+
         <button class="home-menu-btn inv-menu-btn" id="open-inventory-btn">
           <span class="btn-icon">📦</span>
           <div class="btn-text">
@@ -51,12 +97,12 @@
           </div>
         </button>
       </div>
-      
-      
+
+
       <button class="start-day-btn" id="start-day-btn">🚀 BẮT ĐẦU NGÀY MỚI</button>
     </div>
-    
-    
+
+
     <!-- MODAL 1: CỬA HÀNG (SHOP) -->
     <div class="modal-overlay hidden" id="shop-modal">
       <div class="modal-container">
@@ -64,14 +110,14 @@
           <h3>🛒 CỬA HÀNG NGUYÊN LIỆU</h3>
           <button class="close-modal-btn" id="close-shop-btn">✖</button>
         </div>
-        
+
         <!-- TABS CỬA HÀNG -->
         <div class="modal-tabs">
           <button class="modal-tab-btn active" id="shop-tab-btn-glass">🥤 Ly Bia</button>
           <button class="modal-tab-btn" id="shop-tab-btn-beer">🛢️ Bia</button>
           <button class="modal-tab-btn" id="shop-tab-btn-incoming">🚚 Đang Nhập</button>
         </div>
-        
+
         <!-- NỘI DUNG TABS CỬA HÀNG -->
         <div class="modal-body">
           <!-- TAB LY -->
@@ -83,7 +129,7 @@
               </div>
               <button class="buy-btn" id="buy-small-glass-btn">Mua 5 ly (15 Coin)</button>
             </div>
-            
+
             <div class="shop-item">
               <div class="item-info">
                 <span class="item-title">🍺 Ly Vừa (300ml)</span>
@@ -91,7 +137,7 @@
               </div>
               <button class="buy-btn" id="buy-medium-glass-btn">Mua 5 ly (20 Coin)</button>
             </div>
-            
+
             <div class="shop-item">
               <div class="item-info">
                 <span class="item-title">🍻 Ly Lớn (500ml)</span>
@@ -100,7 +146,7 @@
               <button class="buy-btn" id="buy-large-glass-btn">Mua 5 ly (30 Coin)</button>
             </div>
           </div>
-          
+
           <!-- TAB BIA -->
           <div class="modal-tab-content hidden" id="shop-tab-beer">
             <div class="shop-item">
@@ -111,7 +157,7 @@
               <button class="buy-btn" id="buy-keg-btn">Mua (50 Coin)</button>
             </div>
           </div>
-          
+
           <!-- TAB ĐANG NHẬP HÀNG -->
           <div class="modal-tab-content hidden" id="shop-tab-incoming">
             <div class="incoming-notice">
@@ -122,8 +168,8 @@
         </div>
       </div>
     </div>
-    
-    
+
+
     <!-- MODAL 2: KHO HÀNG (INVENTORY) -->
     <div class="modal-overlay hidden" id="inventory-modal">
       <div class="modal-container">
@@ -131,13 +177,13 @@
           <h3>📦 KHO HÀNG CỦA QUÁN</h3>
           <button class="close-modal-btn" id="close-inv-btn">✖</button>
         </div>
-        
+
         <!-- TABS KHO HÀNG -->
         <div class="modal-tabs">
           <button class="modal-tab-btn active" id="inv-tab-btn-glass">🥤 Tồn Kho Ly</button>
           <button class="modal-tab-btn" id="inv-tab-btn-beer">🛢️ Tồn Kho Bia</button>
         </div>
-        
+
         <!-- NỘI DUNG TABS KHO HÀNG -->
         <div class="modal-body">
           <!-- TAB LY -->
@@ -155,7 +201,7 @@
               <b><span id="inv-large-glass-count">10</span> ly</b>
             </div>
           </div>
-          
+
           <!-- TAB BIA -->
           <div class="modal-tab-content hidden" id="inv-tab-beer">
             <div class="inventory-status-item">
@@ -170,8 +216,8 @@
         </div>
       </div>
     </div>
-    
-        <!-- MODAL 3: QUẢN LÝ NHÂN SỰ -->
+
+    <!-- MODAL 3: QUẢN LÝ NHÂN SỰ -->
     <div class="modal-overlay hidden" id="staff-modal">
       <div class="modal-container">
         <div class="modal-header">
@@ -181,7 +227,8 @@
 
         <div class="modal-tabs">
           <button class="modal-tab-btn active" id="staff-tab-btn-hire">🎯 Tuyển Nhân Viên</button>
-          <button class="modal-tab-btn" id="staff-tab-btn-working">👥 Đang Làm Việc (<span id="staff-count-badge">0</span>)</button>
+          <button class="modal-tab-btn" id="staff-tab-btn-working">👥 Đang Làm Việc (<span
+              id="staff-count-badge">0</span>)</button>
         </div>
 
         <div class="modal-body">
@@ -198,10 +245,10 @@
       </div>
     </div>
 
-    
+
     <!-- VIEW 2: GAMEPLAY (SỬA LẠI KHU VỰC NỬA DƯỚI STAGE) -->
     <div class="view-screen hidden" id="game-view">
-      
+
       <!-- NỬA TRÊN: GIỮ NGUYÊN KHUNG HUD & PHASER CANVAS CŨ -->
       <div class="customer-card">
         <div class="hud-top-bar">
@@ -213,49 +260,80 @@
             </div>
           </div>
           <div class="hud-right">
-            <div class="hud-badge coin-badge">🪙 <span id="money-display">0 Coin</span></div>
-            <div class="hud-badge clock-badge">⏰ <span id="day-display">Ngày 1</span> <span id="time-display">15:00</span></div>
+            <div class="hud-badge coin-badge"><img src="assets/icon/coin.png" class="coin-icon" alt="Coin"> <span
+                id="money-display">0 Coin</span></div>
+            <div class="hud-badge clock-badge">⏰ <span id="day-display">Ngày 1</span> <span
+                id="time-display">15:00</span></div>
           </div>
         </div>
-        
+
         <div id="phaser-customer-container"></div>
-        
+
         <div class="patience-bar-wrapper">
           <div class="patience-bar" id="patience-bar"></div>
         </div>
       </div>
-      
-      <!-- NỬA DƯỚI: THAY THẾ TOÀN BỘ SECTION STAGE-SECTION CŨ BẰNG CẤU TRÚC TAB MỚI -->
+
+      <!-- NỬA DƯỚI: SÂN KHẤU RÓT BIA & CHỌN LY -->
       <section class="stage-section" id="stage-section">
-        
-        <!-- THANH TAB ĐIỀU HƯỚNG -->
+
+        <!-- THANH TAB ĐIỀU HƯỚNG (ĐÃ CĂN CHỈNH 1 HÀNG) -->
         <div class="stage-nav-tabs">
           <button class="stage-tab-btn active" id="tab-btn-glass">🥤 Chọn Ly</button>
           <button class="stage-tab-btn" id="tab-btn-pour">🍺 Rót Bia</button>
           <button class="stage-tab-btn" id="tab-btn-sink">🧽 Bồn Ly (<span id="dirty-total-badge">0</span>)</button>
         </div>
-        
+
         <!-- TAB 1: CHỌN LY SẠCH -->
         <div class="tab-content" id="tab-glass-content">
+          <!-- BẢNG THÔNG BÁO ĐƠN HÀNG (ĐÃ CHUYỂN VỀ FLOW TỰ NHIÊN, KHÔNG ĐÈ TAB) -->
           <div class="order-mini-info">
             <span class="order-desc" id="order-desc">Khách đang chờ gọi món...</span>
           </div>
+
+          <!-- DANH SÁCH THẺ CHỌN LY (CẤU TRÚC FLEXBOX 3 KHU VỰC) -->
           <div class="glass-selection-grid">
             <button class="glass-select-btn" id="select-small-btn">
-              <span class="glass-title">🥛 Ly Nhỏ (250ml)</span>
-              <span class="glass-stock">Còn: <b id="clean-small-count">10</b> ly sạch</span>
+              <div class="glass-btn-left">
+                <img src="assets/icon/s-glass.png" class="glass-btn-icon" alt="Ly nhỏ">
+                <div class="glass-info">
+                  <span class="glass-name">Ly Nhỏ</span>
+                  <span class="glass-cap">250ml</span>
+                </div>
+              </div>
+              <div class="glass-stock-badge">
+                Còn: <b id="clean-small-count">10</b> ly sạch
+              </div>
             </button>
+
             <button class="glass-select-btn" id="select-medium-btn">
-              <span class="glass-title">🍺 Ly Vừa (300ml)</span>
-              <span class="glass-stock">Còn: <b id="clean-medium-count">10</b> ly sạch</span>
+              <div class="glass-btn-left">
+                <img src="assets/icon/m-glass.png" class="glass-btn-icon" alt="Ly vừa">
+                <div class="glass-info">
+                  <span class="glass-name">Ly Vừa</span>
+                  <span class="glass-cap">300ml</span>
+                </div>
+              </div>
+              <div class="glass-stock-badge">
+                Còn: <b id="clean-medium-count">10</b> ly sạch
+              </div>
             </button>
+
             <button class="glass-select-btn" id="select-large-btn">
-              <span class="glass-title">🍻 Ly Lớn (500ml)</span>
-              <span class="glass-stock">Còn: <b id="clean-large-count">10</b> ly sạch</span>
+              <div class="glass-btn-left">
+                <img src="assets/icon/l-glass.png" class="glass-btn-icon" alt="Ly lớn">
+                <div class="glass-info">
+                  <span class="glass-name">Ly Lớn</span>
+                  <span class="glass-cap">500ml</span>
+                </div>
+              </div>
+              <div class="glass-stock-badge">
+                Còn: <b id="clean-large-count">10</b> ly sạch
+              </div>
             </button>
           </div>
         </div>
-        
+
         <!-- TAB 2: KHU VỰC RÓT BIA -->
         <div class="tab-content hidden" id="tab-pour-content">
           <div class="beer-tap-machine" id="tap-machine">
@@ -266,35 +344,43 @@
               <div class="beer-stream" id="beer-stream"></div>
             </div>
           </div>
-          
-          <div class="glass-wrapper" id="glass-wrapper">
+
+          <!-- KHUNG LY RÓT BIA THẬT (LAYER STACKING) -->
+          <div class="glass-wrapper hidden" id="glass-wrapper">
             <div class="glass-container glass-medium" id="glass-container">
+              <!-- Lớp 1: Vùng Vàng Mục Tiêu -->
               <div class="target-zone" id="target-zone">VÙNG VÀNG</div>
-              <div class="beer-liquid" id="beer-liquid">
-                <div class="beer-foam"></div>
+
+              <!-- Lớp 2: Bia & Bọt (Nằm DƯỚI ảnh ly) -->
+              <div class="beer-liquid-wrapper">
+                <div class="beer-liquid" id="beer-liquid">
+                  <div class="beer-foam"></div>
+                </div>
               </div>
+
+              <!-- Lớp 3: Ảnh Ly PNG Đè LÊN TRÊN (Trong suốt lòng ly) -->
+              <img id="glass-overlay-img" class="glass-overlay-img" src="assets/icon/m-glass.png" alt="Glass Overlay">
             </div>
-            <div class="glass-handle" id="glass-handle"></div>
           </div>
-          
+
           <div class="keg-live-info">
             <span>🛢️ Bia trong máy: <b id="live-keg-ml">19000</b> ml</span>
             <button class="change-keg-btn" id="change-keg-btn">🔄 Thay Bom (3s)</button>
           </div>
-          
+
           <div class="pour-action-container">
             <button class="pour-btn" id="pour-btn">
               <span class="btn-icon">🍺</span>
               <span class="btn-text">GIỮ ĐỂ RÓT BIA</span>
             </button>
-            
+
             <div class="post-pour-actions hidden" id="post-pour-actions">
               <button class="serve-btn" id="serve-btn">✅ RA BIA</button>
               <button class="discard-btn" id="discard-btn">🗑️ ĐỔ BỎ</button>
             </div>
           </div>
         </div>
-        
+
         <!-- TAB 3: BỒN RỬA LY DƠ -->
         <div class="tab-content hidden" id="tab-sink-content">
           <div class="sink-status-box">
@@ -305,13 +391,13 @@
               <div>🍻 Ly lớn dơ: <b id="dirty-large-count">0</b></div>
             </div>
           </div>
-          
+
           <button class="wash-btn" id="wash-btn">🚿 RỬA TẤT CẢ LY (5 Giây)</button>
           <div class="wash-progress-bar hidden" id="wash-progress-bar">
             <div class="wash-progress-fill" id="wash-progress-fill"></div>
           </div>
         </div>
-        
+
         <!-- OVERLAY HẾT GIỜ -->
         <div class="night-overlay hidden" id="night-overlay">
           <h2>🌙 HẾT GIỜ LÀM VIỆC</h2>
@@ -319,25 +405,40 @@
           <button class="next-day-btn" id="next-day-btn">VỀ TRANG CHỦ 🏠</button>
         </div>
       </section>
-      
+
     </div>
-    
+
   </div>
-  
-  
+
+  <!-- MODAL ADMIN -->
+  <div class="modal-overlay hidden" id="admin-modal">
+    <div class="modal-container" style="max-width: 480px;">
+      <div class="modal-header" style="background: #d32f2f; color: white;">
+        <h3>⚙️ QUẢN TRỊ VIÊN (ADMIN)</h3>
+        <button class="close-modal-btn" id="close-admin-btn" style="color: white;">✖</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.8rem; color: #555;">Danh sách toàn bộ tài khoản người chơi trong Database:</p>
+        <div id="admin-players-list">Đang tải danh sách...</div>
+      </div>
+    </div>
+  </div>
+
   <!-- THƯ VIỆN PHASER 3 -->
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
-  
+
   <!-- FIREBASE & LOGIC -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <!-- Firebase Auth -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-  
+
   <script src="firebase.js"></script>
   <script src="logic.js"></script>
   <script src="ui.js"></script>
   <script src="phaser-view.js"></script>
   <script src="main.js"></script>
-  
+
 </body>
 
 </html>

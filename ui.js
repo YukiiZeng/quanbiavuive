@@ -2,7 +2,7 @@
 
 const UI = {
   elements: {},
-  
+
   init() {
     this.elements = {
       moneyDisplay: document.getElementById('money-display'),
@@ -10,7 +10,7 @@ const UI = {
       beerLiquid: document.getElementById('beer-liquid'),
       pourBtn: document.getElementById('pour-btn'),
       stageSection: document.getElementById('stage-section'),
-      
+
       // Đơn & HUD
       customerName: document.getElementById('customer-name'),
       glassTag: document.getElementById('glass-tag'),
@@ -23,27 +23,27 @@ const UI = {
       patienceBar: document.getElementById('patience-bar'),
       nightOverlay: document.getElementById('night-overlay'),
       nextDayBtn: document.getElementById('next-day-btn'),
-      
+
       homeView: document.getElementById('home-view'),
       gameView: document.getElementById('game-view'),
       homeCoins: document.getElementById('home-coins'),
       homeDay: document.getElementById('home-day'),
-      
+
       // MODALS & BUTTONS
       shopModal: document.getElementById('shop-modal'),
       invModal: document.getElementById('inventory-modal'),
-      
+
       shopSmallCount: document.getElementById('shop-small-glass-count'),
       shopMediumCount: document.getElementById('shop-medium-glass-count'),
       shopLargeCount: document.getElementById('shop-large-glass-count'),
       shopKegCount: document.getElementById('shop-keg-count'),
-      
+
       invSmallCount: document.getElementById('inv-small-glass-count'),
       invMediumCount: document.getElementById('inv-medium-glass-count'),
       invLargeCount: document.getElementById('inv-large-glass-count'),
       invKegCount: document.getElementById('inv-keg-count'),
       invKegMl: document.getElementById('inv-keg-ml'),
-      
+
       cleanSmallCount: document.getElementById('clean-small-count'),
       cleanMediumCount: document.getElementById('clean-medium-count'),
       cleanLargeCount: document.getElementById('clean-large-count'),
@@ -51,11 +51,11 @@ const UI = {
       dirtyMediumCount: document.getElementById('dirty-medium-count'),
       dirtyLargeCount: document.getElementById('dirty-large-count'),
       dirtyTotalBadge: document.getElementById('dirty-total-badge'),
-      
+
       liveKegMl: document.getElementById('live-keg-ml'),
       changeKegBtn: document.getElementById('change-keg-btn'),
       postPourActions: document.getElementById('post-pour-actions'),
-      
+
       washBtn: document.getElementById('wash-btn'),
       washProgressBar: document.getElementById('wash-progress-bar'),
       washProgressFill: document.getElementById('wash-progress-fill'),
@@ -66,11 +66,33 @@ const UI = {
       candidatesList: document.getElementById('candidates-list'),
       hiredStaffList: document.getElementById('hired-staff-list'),
       staffCountBadge: document.getElementById('staff-count-badge'),
+
+      // Thêm vào trong UI.elements của hàm init():
+      authView: document.getElementById('auth-view'),
+      authForm: document.getElementById('auth-form'),
+      authUsername: document.getElementById('auth-username'),
+      authPassword: document.getElementById('auth-password'),
+      authSubmitBtn: document.getElementById('auth-submit-btn'),
+      // BỔ SUNG DÒNG NÀY:
+      authGoogleBtn: document.getElementById('auth-google-btn'),
+      tabLoginBtn: document.getElementById('tab-login-btn'),
+      tabLoginBtn: document.getElementById('tab-login-btn'),
+      tabRegisterBtn: document.getElementById('tab-register-btn'),
+      authErrorMsg: document.getElementById('auth-error-msg'),
+
+      userDisplayName: document.getElementById('user-display-name'),
+      adminBadge: document.getElementById('admin-badge'),
+      openAdminBtn: document.getElementById('open-admin-btn'),
+      adminModal: document.getElementById('admin-modal'),
+      closeAdminBtn: document.getElementById('close-admin-btn'),
+      adminPlayersList: document.getElementById('admin-players-list'),
+      logoutBtn: document.getElementById('logout-btn'),
       
+
     };
   },
-  
-  
+
+
   renderOrder(order) {
     if (!order) {
       if (this.elements.customerName) this.elements.customerName.innerText = "👤 Đang chờ...";
@@ -83,29 +105,29 @@ const UI = {
       this.renderBeerLevel(0);
       return;
     }
-    
+
     if (this.elements.customerName) this.elements.customerName.innerText = `👤 ${order.customerName}`;
     if (this.elements.glassTag) this.elements.glassTag.innerText = `🍺 ${order.glass.name}`;
     if (this.elements.orderDesc) this.elements.orderDesc.innerText = order.description;
-    
+
     if (this.elements.glassContainer) {
       this.elements.glassContainer.className = `glass-container ${order.glass.class}`;
     }
-    
+
     if (this.elements.targetZone) {
       this.elements.targetZone.style.bottom = `${order.targetMin}%`;
       this.elements.targetZone.style.height = `${order.targetMax - order.targetMin}%`;
     }
-    
+
     this.renderBeerLevel(0);
     this.triggerPhaserUpdate();
   },
-  
+
   // SỬA HÀM NÀY TRONG ui.js (Tắt/bật tia bia triệt để)
   setPouringState(isPouring) {
     const stageSection = this.elements.stageSection || document.getElementById('stage-section');
     const tapMachine = document.getElementById('tap-machine');
-    
+
     if (isPouring) {
       if (stageSection) stageSection.classList.add('pouring');
       if (tapMachine) tapMachine.classList.add('pouring');
@@ -114,7 +136,7 @@ const UI = {
       if (tapMachine) tapMachine.classList.remove('pouring');
     }
   },
-  
+
   // BỔ SUNG HÀM NÀY VÀO ui.js (Ẩn/Hiện ly bia trong vòi)
   toggleGlassWrapper(show) {
     const glassWrapper = document.getElementById('glass-wrapper');
@@ -126,50 +148,58 @@ const UI = {
       }
     }
   },
-  
+
   // BỔ SUNG HÀM NÀY VÀO TRONG ĐỐI TƯỢNG UI Ở FILE ui.js
   setupPourGlassView(glassTypeKey, order) {
     const glass = GlassTypes[glassTypeKey];
+    const overlayImg = document.getElementById('glass-overlay-img');
+
     if (this.elements.glassContainer && glass) {
       this.elements.glassContainer.className = `glass-container ${glass.class}`;
     }
+    
+    // Cập nhật ảnh ly PNG tương ứng (s-glass / m-glass / l-glass)
+    if (overlayImg && glass) {
+      overlayImg.src = glass.iconPath;
+    }
+
     if (this.elements.targetZone && order) {
       this.elements.targetZone.style.bottom = `${order.targetMin}%`;
       this.elements.targetZone.style.height = `${order.targetMax - order.targetMin}%`;
     }
     this.renderBeerLevel(0);
   },
-  
+
   renderMoney(moneyText) {
     if (this.elements.moneyDisplay) {
       this.elements.moneyDisplay.innerText = moneyText;
     }
   },
-  
+
   renderBeerLevel(percent) {
     if (this.elements.beerLiquid) {
       this.elements.beerLiquid.style.height = `${percent}%`;
     }
   },
-  
+
   renderStatus(text, color = "#ffc107") {
     if (this.elements.statusDisplay) {
       this.elements.statusDisplay.innerText = text;
       this.elements.statusDisplay.style.color = color;
     }
   },
-  
+
   bindPourEvents(onStart, onStop) {
     if (!this.elements.pourBtn) return;
     this.elements.pourBtn.addEventListener('pointerdown', onStart);
     window.addEventListener('pointerup', onStop);
   },
-  
+
   renderClock(day, hour, minute) {
     if (this.elements.dayDisplay) this.elements.dayDisplay.innerText = `Ngày ${day}`;
     if (this.elements.timeDisplay) this.elements.timeDisplay.innerText = GameLogic.formatTime(hour, minute);
   },
-  
+
   renderQueue(count) {
     if (this.elements.queueBadge) {
       this.elements.queueBadge.innerText = count;
@@ -177,7 +207,7 @@ const UI = {
     }
     this.triggerPhaserUpdate();
   },
-  
+
   renderPatience(percent) {
     if (this.elements.patienceBar) {
       this.elements.patienceBar.style.width = `${percent}%`;
@@ -186,20 +216,20 @@ const UI = {
       else this.elements.patienceBar.style.backgroundColor = '#f44336';
     }
   },
-  
+
   toggleNightOverlay(show) {
     if (this.elements.nightOverlay) {
       if (show) this.elements.nightOverlay.classList.remove('hidden');
       else this.elements.nightOverlay.classList.add('hidden');
     }
   },
-  
+
   bindNextDayEvent(onNextDay) {
     if (this.elements.nextDayBtn) {
       this.elements.nextDayBtn.addEventListener('click', onNextDay);
     }
   },
-  
+
   triggerPhaserUpdate() {
     if (window.PhaserCustomerView && typeof GameState !== 'undefined') {
       window.PhaserCustomerView.updateRender(GameState.currentOrder, GameState.customerQueue);
@@ -207,15 +237,19 @@ const UI = {
   },
   // Bổ sung vào đối tượng UI:
   switchView(viewName) {
-    if (viewName === 'home') {
-      this.elements.homeView.classList.remove('hidden');
-      this.elements.gameView.classList.add('hidden');
-    } else {
-      this.elements.homeView.classList.add('hidden');
-      this.elements.gameView.classList.remove('hidden');
+    if (this.elements.authView) this.elements.authView.classList.add('hidden');
+    if (this.elements.homeView) this.elements.homeView.classList.add('hidden');
+    if (this.elements.gameView) this.elements.gameView.classList.add('hidden');
+
+    if (viewName === 'auth') {
+      if (this.elements.authView) this.elements.authView.classList.remove('hidden');
+    } else if (viewName === 'home') {
+      if (this.elements.homeView) this.elements.homeView.classList.remove('hidden');
+    } else if (viewName === 'game') {
+      if (this.elements.gameView) this.elements.gameView.classList.remove('hidden');
     }
   },
-  
+
   switchTab(tabName) {
     ['glass', 'pour', 'sink'].forEach(t => {
       const btn = document.getElementById(`tab-btn-${t}`);
@@ -229,21 +263,21 @@ const UI = {
       }
     });
   },
-  
+
   renderInventory(inventory, attachedKegMl) {
     if (this.elements.cleanSmallCount) this.elements.cleanSmallCount.innerText = inventory.glasses.small.clean;
     if (this.elements.cleanMediumCount) this.elements.cleanMediumCount.innerText = inventory.glasses.medium.clean;
     if (this.elements.cleanLargeCount) this.elements.cleanLargeCount.innerText = inventory.glasses.large.clean;
-    
+
     if (this.elements.dirtySmallCount) this.elements.dirtySmallCount.innerText = inventory.glasses.small.dirty;
     if (this.elements.dirtyMediumCount) this.elements.dirtyMediumCount.innerText = inventory.glasses.medium.dirty;
     if (this.elements.dirtyLargeCount) this.elements.dirtyLargeCount.innerText = inventory.glasses.large.dirty;
-    
+
     const totalDirty = inventory.glasses.small.dirty + inventory.glasses.medium.dirty + inventory.glasses.large.dirty;
     if (this.elements.dirtyTotalBadge) this.elements.dirtyTotalBadge.innerText = totalDirty;
     if (this.elements.liveKegMl) this.elements.liveKegMl.innerText = attachedKegMl;
   },
-  
+
   togglePourActionButtons(mode) {
     // mode = 'ready' (Nút Rót) / 'poured' (Nút Ra Bia & Đổ Bỏ)
     if (mode === 'poured') {
@@ -258,13 +292,25 @@ const UI = {
   renderHomeData(state) {
     if (this.elements.homeCoins) this.elements.homeCoins.innerText = state.coins;
     if (this.elements.homeDay) this.elements.homeDay.innerText = `Ngày ${state.day}`;
-    
+
+    // Hiển thị tên người dùng & Nút Admin
+    if (state.user) {
+      if (this.elements.userDisplayName) this.elements.userDisplayName.innerText = state.user.username || 'User';
+      if (state.user.role === 'admin') {
+        if (this.elements.adminBadge) this.elements.adminBadge.classList.remove('hidden');
+        if (this.elements.openAdminBtn) this.elements.openAdminBtn.classList.remove('hidden');
+      } else {
+        if (this.elements.adminBadge) this.elements.adminBadge.classList.add('hidden');
+        if (this.elements.openAdminBtn) this.elements.openAdminBtn.classList.add('hidden');
+      }
+    }
+
     // Render Modal Cửa Hàng
     if (this.elements.shopKegCount) this.elements.shopKegCount.innerText = state.inventory.kegs;
     if (this.elements.shopSmallCount) this.elements.shopSmallCount.innerText = state.inventory.glasses.small.clean + state.inventory.glasses.small.dirty;
     if (this.elements.shopMediumCount) this.elements.shopMediumCount.innerText = state.inventory.glasses.medium.clean + state.inventory.glasses.medium.dirty;
     if (this.elements.shopLargeCount) this.elements.shopLargeCount.innerText = state.inventory.glasses.large.clean + state.inventory.glasses.large.dirty;
-    
+
     // Render Modal Kho Hàng
     if (this.elements.invKegCount) this.elements.invKegCount.innerText = state.inventory.kegs;
     if (this.elements.invKegMl) this.elements.invKegMl.innerText = state.attachedKegMl;
@@ -272,8 +318,8 @@ const UI = {
     if (this.elements.invMediumCount) this.elements.invMediumCount.innerText = state.inventory.glasses.medium.clean + state.inventory.glasses.medium.dirty;
     if (this.elements.invLargeCount) this.elements.invLargeCount.innerText = state.inventory.glasses.large.clean + state.inventory.glasses.large.dirty;
   },
-  
-  
+
+
   renderOrderInfo(order) {
     this.renderOrder(order);
   },
@@ -282,7 +328,7 @@ const UI = {
     if (this.elements.staffCountBadge) {
       this.elements.staffCountBadge.innerText = staffData.hired.length;
     }
-    
+
     // Render danh sách Ứng viên tuyển dụng
     if (this.elements.candidatesList) {
       if (staffData.candidates.length === 0) {
@@ -305,7 +351,7 @@ const UI = {
         `).join('');
       }
     }
-    
+
     // Render danh sách Nhân viên đang làm
     if (this.elements.hiredStaffList) {
       if (staffData.hired.length === 0) {

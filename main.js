@@ -2,6 +2,7 @@
 
 // Thay thế khai báo GameState ở đầu file main.js:
 const GameState = {
+  user: null, // Lưu thông tin người dùng { uid, username, role }
   coins: 100,
   day: 1,
   hour: 15,
@@ -35,27 +36,49 @@ const GameState = {
 
 
 // Khởi tạo game & Tải dữ liệu lưu trữ
+let currentAuthMode = 'login'; // 'login' hoặc 'register'
+
 async function initGame() {
   UI.init();
   if (typeof initPhaserCustomerView === 'function') {
     initPhaserCustomerView();
   }
-  
-  // Tải dữ liệu từ Firebase / LocalStorage
+
   if (typeof FirebaseService !== 'undefined') {
     FirebaseService.init();
-    const savedData = await FirebaseService.loadProgress();
-    if (savedData) {
-      if (typeof savedData.coins === 'number') GameState.coins = savedData.coins;
-      if (typeof savedData.day === 'number') GameState.day = savedData.day;
-      if (savedData.inventory) GameState.inventory = savedData.inventory;
-      if (typeof savedData.attachedKegMl === 'number') GameState.attachedKegMl = savedData.attachedKegMl;
-    }
+
+    // Lắng nghe sự kiện trạng thái Đăng nhập Firebase
+    FirebaseService.onAuthStateChanged(async (user) => {
+      if (user) {
+        // Đã đăng nhập -> Tải dữ liệu từ Firebase
+        const progress = await FirebaseService.loadProgress(user.uid);
+        if (progress) {
+          GameState.coins = progress.coins ?? 100;
+          GameState.day = progress.day ?? 1;
+          if (progress.inventory) GameState.inventory = progress.inventory;
+          if (progress.staff) GameState.staff = progress.staff; // Nạp lại danh sách nhân viên đã thuê!
+          if (typeof progress.attachedKegMl === 'number') GameState.attachedKegMl = progress.attachedKegMl;
+          GameState.user = {
+            uid: user.uid,
+            username: progress.username || 'Player',
+            role: progress.role || 'player'
+          };
+        } else {
+          GameState.user = { uid: user.uid, username: 'Player', role: 'player' };
+        }
+
+        UI.renderHomeData(GameState);
+        UI.switchView('home');
+      } else {
+        // Chưa đăng nhập -> Buộc quay về màn hình Auth
+        GameState.user = null;
+        UI.switchView('auth');
+      }
+    });
   }
-  
+
   bindEvents();
-  UI.renderHomeData(GameState);
-  UI.switchView('home');
+  bindAuthEvents();
 }
 
 function saveGameState() {
@@ -70,7 +93,7 @@ function bindEvents() {
   if (startDayBtn) {
     startDayBtn.addEventListener('click', startNewDayShift);
   }
-  
+
   // --- SỰ KIỆN MỞ / ĐÓNG MODAL CỬA HÀNG & KHO ---
   const openShopBtn = document.getElementById('open-shop-btn');
   const openInvBtn = document.getElementById('open-inventory-btn');
@@ -85,35 +108,35 @@ function bindEvents() {
     UI.elements.staffModal.classList.remove('hidden');
   });
   if (closeStaffBtn) closeStaffBtn.addEventListener('click', () => UI.elements.staffModal.classList.add('hidden'));
-  
+
   bindModalTabs('staff', ['hire', 'working']);
-  
+
   if (openShopBtn) openShopBtn.addEventListener('click', () => UI.elements.shopModal.classList.remove('hidden'));
   if (openInvBtn) openInvBtn.addEventListener('click', () => UI.elements.invModal.classList.remove('hidden'));
   if (closeShopBtn) closeShopBtn.addEventListener('click', () => UI.elements.shopModal.classList.add('hidden'));
   if (closeInvBtn) closeInvBtn.addEventListener('click', () => UI.elements.invModal.classList.add('hidden'));
-  
+
   // --- CHUYỂN TAB TRONG MODAL CỬA HÀNG ---
   bindModalTabs('shop', ['glass', 'beer', 'incoming']);
-  
+
   // --- CHUYỂN TAB TRONG MODAL KHO ---
   bindModalTabs('inv', ['glass', 'beer']);
-  
+
   // Bắt sự kiện mua sắm Cửa Hàng (Shop)
   const buyKegBtn = document.getElementById('buy-keg-btn');
   const buySmallBtn = document.getElementById('buy-small-glass-btn');
   const buyMediumBtn = document.getElementById('buy-medium-glass-btn');
   const buyLargeBtn = document.getElementById('buy-large-glass-btn');
-  
+
   if (buyKegBtn) buyKegBtn.addEventListener('click', handleBuyKeg);
   if (buySmallBtn) buySmallBtn.addEventListener('click', () => handleBuyGlass('small'));
   if (buyMediumBtn) buyMediumBtn.addEventListener('click', () => handleBuyGlass('medium'));
   if (buyLargeBtn) buyLargeBtn.addEventListener('click', () => handleBuyGlass('large'));
-  
+
   // Nút Thay Bom Bia trong game
   const changeKegBtn = document.getElementById('change-keg-btn');
   if (changeKegBtn) changeKegBtn.addEventListener('click', handleChangeKeg);
-  
+
   // Bắt sự kiện quay về trang chủ khi hết giờ & Lưu tiến trình qua ngày
   UI.bindNextDayEvent(() => {
     GameState.day += 1;
@@ -122,7 +145,7 @@ function bindEvents() {
     UI.renderHomeData(GameState);
     UI.switchView('home');
   });
-  
+
   // Chuyển Tab trong Gameplay
   const tabGlass = document.getElementById('tab-btn-glass');
   const tabPour = document.getElementById('tab-btn-pour');
@@ -130,7 +153,7 @@ function bindEvents() {
   if (tabGlass) tabGlass.addEventListener('click', () => UI.switchTab('glass'));
   if (tabPour) tabPour.addEventListener('click', () => UI.switchTab('pour'));
   if (tabSink) tabSink.addEventListener('click', () => UI.switchTab('sink'));
-  
+
   // Sự kiện chọn ly
   const btnSmall = document.getElementById('select-small-btn');
   const btnMedium = document.getElementById('select-medium-btn');
@@ -138,7 +161,7 @@ function bindEvents() {
   if (btnSmall) btnSmall.addEventListener('click', () => handleSelectGlass('small'));
   if (btnMedium) btnMedium.addEventListener('click', () => handleSelectGlass('medium'));
   if (btnLarge) btnLarge.addEventListener('click', () => handleSelectGlass('large'));
-  
+
   // Nút Ra bia / Đổ bỏ / Rửa ly
   const serveBtn = document.getElementById('serve-btn');
   const discardBtn = document.getElementById('discard-btn');
@@ -146,7 +169,7 @@ function bindEvents() {
   if (serveBtn) serveBtn.addEventListener('click', handleServeBeer);
   if (discardBtn) discardBtn.addEventListener('click', handleDiscardBeer);
   if (washBtn) washBtn.addEventListener('click', handleWashGlasses);
-  
+
   UI.bindPourEvents(startPouring, stopPouring);
   window.addEventListener('pointercancel', stopPouring);
   window.addEventListener('pointerup', stopPouring);
@@ -192,12 +215,12 @@ function handleBuyGlass(type) {
   const price = GameConfig.GLASS_PACK_PRICES[type];
   const packQty = GameConfig.GLASS_PACK_QTY;
   if (!price) return;
-  
+
   if (GameState.coins < price) {
     alert("⚠️ Bạn không đủ Coin để mua gói ly này!");
     return;
   }
-  
+
   GameState.coins -= price;
   GameState.inventory.glasses[type].clean += packQty;
   saveGameState();
@@ -210,15 +233,15 @@ function handleChangeKeg() {
     return;
   }
   if (GameState.isChangingKeg) return;
-  
+
   GameState.isChangingKeg = true;
   UI.renderStatus("⏳ Đang thay bom bia mới (3s)...", "#2196f3");
-  
+
   setTimeout(() => {
     GameState.inventory.kegs -= 1;
     GameState.attachedKegMl = GameConfig.KEG_VOLUME_ML;
     GameState.isChangingKeg = false;
-    
+
     saveGameState();
     UI.renderInventory(GameState.inventory, GameState.attachedKegMl);
     UI.renderHomeData(GameState);
@@ -232,14 +255,14 @@ function startNewDayShift() {
   GameState.isOpen = true;
   GameState.currentOrder = null;
   GameState.selectedGlassType = null;
-  
+
   UI.switchView('game');
   UI.switchTab('glass');
   UI.renderMoney(GameLogic.formatCurrency(GameState.coins));
   UI.renderClock(GameState.day, GameState.hour, GameState.minute);
   UI.renderInventory(GameState.inventory, GameState.attachedKegMl);
   UI.renderStatus(`Ngày ${GameState.day} bắt đầu!`, "#4caf50");
-  
+
   startClock();
   handleCustomerSpawning();
 }
@@ -255,35 +278,35 @@ function startPouring(e) {
     e.stopPropagation();
   }
   if (GameState.isPouring || !GameState.currentOrder) return;
-  
+
   if (!GameState.selectedGlassType) {
     UI.renderStatus("⚠️ Bạn chưa chọn ly! Vui lòng sang tab 'Chọn Ly' trước.", "#f44336");
     return;
   }
-  
+
   if (GameState.attachedKegMl <= 0) {
     UI.renderStatus("⚠️ Hết bia trong máy! Hãy thay bom bia ngay.", "#f44336");
     return;
   }
-  
+
   GameState.isPouring = true;
   GameState.currentLevel = 0;
-  
+
   UI.setPouringState(true);
   UI.renderBeerLevel(0);
   UI.renderStatus("Đang rót bia...", "#aaa");
-  
+
   const glass = GlassTypes[GameState.selectedGlassType];
   const actualSpeed = (GameState.basePourSpeed || 1.0) * glass.speedMultiplier;
-  
+
   if (GameState.pourTimer) clearInterval(GameState.pourTimer);
-  
+
   GameState.pourTimer = setInterval(() => {
     if (!GameState.isPouring) {
       clearInterval(GameState.pourTimer);
       return;
     }
-    
+
     GameState.currentLevel += actualSpeed;
     if (GameState.currentLevel >= 100) {
       GameState.currentLevel = 100;
@@ -298,13 +321,13 @@ function startPouring(e) {
 function stopPouring(e) {
   if (e) e.preventDefault();
   if (!GameState.isPouring) return;
-  
+
   GameState.isPouring = false;
   if (GameState.pourTimer) {
     clearInterval(GameState.pourTimer);
     GameState.pourTimer = null;
   }
-  
+
   UI.setPouringState(false);
   UI.togglePourActionButtons('poured');
   UI.renderStatus("Đã hãm vòi! Bấm 'Ra Bia' hoặc 'Đổ Bỏ'.", "#ffca28");
@@ -314,16 +337,16 @@ document.addEventListener('DOMContentLoaded', initGame);
 
 function startClock() {
   if (GameState.clockTimer) clearInterval(GameState.clockTimer);
-  
+
   GameState.clockTimer = setInterval(() => {
     if (!GameState.isOpen) return;
-    
+
     GameState.minute += 10;
     if (GameState.minute >= 60) {
       GameState.minute = 0;
       GameState.hour += 1;
     }
-    
+
     UI.renderClock(GameState.day, GameState.hour, GameState.minute);
     runStaffAutomation()
     if (GameState.hour >= GameConfig.END_HOUR) {
@@ -332,29 +355,29 @@ function startClock() {
       handleCustomerSpawning();
     }
   }, GameConfig.TIME_SCALE_MS);
-  
+
   if (GameState.patienceTimer) clearInterval(GameState.patienceTimer);
   GameState.patienceTimer = setInterval(handlePatienceTick, 200);
-  
+
 }
 
 function handleCustomerSpawning() {
   if (!GameState.isOpen || GameState.hour >= GameConfig.END_HOUR) return;
-  
+
   const isPeak = GameLogic.isPeakHour(GameState.hour);
   const maxQueue = isPeak ? 4 : 2;
   const spawnChance = isPeak ? 0.6 : 0.25;
-  
+
   const totalCustomers = (GameState.currentOrder ? 1 : 0) + GameState.customerQueue.length;
-  
+
   if (totalCustomers < maxQueue && Math.random() < spawnChance) {
     GameState.customerQueue.push(GameLogic.generateOrder());
   }
-  
+
   if (!GameState.currentOrder && GameState.customerQueue.length > 0) {
     serveNextCustomer();
   }
-  
+
   UI.renderQueue(GameState.customerQueue.length);
 }
 
@@ -371,12 +394,12 @@ function serveNextCustomer() {
 
 function handlePatienceTick() {
   if (!GameState.currentOrder || GameState.isPouring || !GameState.isOpen) return;
-  
+
   GameState.currentOrder.patienceCurrent -= 0.2;
   const percent = (GameState.currentOrder.patienceCurrent / GameState.currentOrder.patienceMax) * 100;
-  
+
   UI.renderPatience(percent);
-  
+
   if (GameState.currentOrder.patienceCurrent <= 0) {
     UI.renderStatus(`Khách giận dỗi bỏ về vì chờ quá lâu! 😡`, "#f44336");
     serveNextCustomer();
@@ -387,10 +410,10 @@ function closePubForNight() {
   GameState.isOpen = false;
   GameState.isPouring = false;
   clearInterval(GameState.pourTimer);
-  
+
   GameState.currentOrder = null;
   GameState.customerQueue = [];
-  
+
   UI.setPouringState(false);
   UI.renderOrder(null);
   UI.renderQueue(0);
@@ -399,30 +422,30 @@ function closePubForNight() {
   // Thêm đoạn này vào cuối hàm closePubForNight() trong main.js:
   let totalWages = 0;
   GameState.staff.hired.forEach(e => totalWages += e.wagePerDay);
-  
+
   if (totalWages > 0) {
     GameState.coins -= totalWages;
     saveGameState();
     UI.renderMoney(GameLogic.formatCurrency(GameState.coins));
     UI.renderStatus(`🌙 Đã trừ ${totalWages} Coin tiền lương nhân viên hôm nay!`, "#ff9800");
   }
-  
+
 }
 
 function handleSelectGlass(glassTypeKey) {
   if (!GameState.currentOrder) return;
-  
+
   const stock = GameState.inventory.glasses[glassTypeKey];
   if (stock.clean <= 0) {
     UI.renderStatus("Hết ly sạch! Hãy sang tab Bồn Ly để rửa.", "#f44336");
     UI.switchTab('sink');
     return;
   }
-  
+
   stock.clean -= 1;
   GameState.selectedGlassType = glassTypeKey;
   UI.renderInventory(GameState.inventory, GameState.attachedKegMl);
-  
+
   UI.setupPourGlassView(glassTypeKey, GameState.currentOrder);
   UI.toggleGlassWrapper(true);
   UI.togglePourActionButtons('ready');
@@ -431,23 +454,23 @@ function handleSelectGlass(glassTypeKey) {
 
 function handleServeBeer() {
   if (!GameState.currentOrder || !GameState.selectedGlassType) return;
-  
+
   const pouredMl = GameLogic.calculatePouredVolumeMl(GameState.selectedGlassType, GameState.currentLevel);
   GameState.attachedKegMl = Math.max(0, GameState.attachedKegMl - pouredMl);
   GameState.inventory.glasses[GameState.selectedGlassType].dirty += 1;
-  
+
   const result = GameLogic.calculatePourResult(GameState.currentLevel, GameState.currentOrder, GameState.selectedGlassType);
   GameState.coins += result.earned;
-  
+
   saveGameState(); // Lưu dữ liệu sau mỗi đơn bia thành công
-  
+
   UI.renderMoney(GameLogic.formatCurrency(GameState.coins));
   UI.renderInventory(GameState.inventory, GameState.attachedKegMl);
   UI.renderStatus(result.statusText, result.statusColor);
-  
+
   resetPourState();
   UI.switchTab('glass');
-  
+
   setTimeout(() => {
     if (GameState.isOpen) serveNextCustomer();
   }, 1200);
@@ -455,16 +478,16 @@ function handleServeBeer() {
 
 function handleDiscardBeer() {
   if (!GameState.selectedGlassType) return;
-  
+
   const pouredMl = GameLogic.calculatePouredVolumeMl(GameState.selectedGlassType, GameState.currentLevel);
   GameState.attachedKegMl = Math.max(0, GameState.attachedKegMl - pouredMl);
   GameState.inventory.glasses[GameState.selectedGlassType].dirty += 1;
-  
+
   saveGameState();
-  
+
   UI.renderInventory(GameState.inventory, GameState.attachedKegMl);
   UI.renderStatus("Đã đổ bỏ ly bia hỏng!", "#f44336");
-  
+
   resetPourState();
   UI.switchTab('glass');
 }
@@ -482,16 +505,16 @@ function handleWashGlasses() {
   if (GameState.isWashing) return;
   const totalDirty = GameState.inventory.glasses.small.dirty + GameState.inventory.glasses.medium.dirty + GameState.inventory.glasses.large.dirty;
   if (totalDirty <= 0) return;
-  
+
   GameState.isWashing = true;
   UI.elements.washBtn.disabled = true;
   UI.elements.washProgressBar.classList.remove('hidden');
-  
+
   let progress = 0;
   const interval = setInterval(() => {
     progress += 20;
     UI.elements.washProgressFill.style.width = `${progress}%`;
-    
+
     if (progress >= 100) {
       clearInterval(interval);
       Object.keys(GameState.inventory.glasses).forEach(k => {
@@ -501,7 +524,7 @@ function handleWashGlasses() {
       GameState.isWashing = false;
       UI.elements.washBtn.disabled = false;
       UI.elements.washProgressBar.classList.add('hidden');
-      
+
       saveGameState();
       UI.renderInventory(GameState.inventory, GameState.attachedKegMl);
       UI.renderStatus("Đã rửa sạch toàn bộ ly!", "#4caf50");
@@ -519,22 +542,22 @@ function refreshCandidatesIfNeeded() {
   }
 }
 
-window.handleHireStaff = function(index) {
+window.handleHireStaff = function (index) {
   const candidate = GameState.staff.candidates[index];
   if (!candidate) return;
-  
+
   GameState.staff.hired.push(candidate);
   GameState.staff.candidates.splice(index, 1);
-  
+
   saveGameState();
   UI.renderStaffLists(GameState.staff);
   UI.renderStatus(`Đã tuyển ${candidate.name} làm ${candidate.roleName}!`, "#4caf50");
 };
 
-window.handleFireStaff = function(index) {
+window.handleFireStaff = function (index) {
   const emp = GameState.staff.hired[index];
   if (!emp) return;
-  
+
   GameState.staff.hired.splice(index, 1);
   saveGameState();
   UI.renderStaffLists(GameState.staff);
@@ -543,20 +566,20 @@ window.handleFireStaff = function(index) {
 
 function runStaffAutomation() {
   if (!GameState.isOpen) return;
-  
+
   const hasWaiter = GameState.staff.hired.some(e => e.role === 'waiter');
   const hasBartender = GameState.staff.hired.some(e => e.role === 'bartender');
   const hasCleaner = GameState.staff.hired.some(e => e.role === 'cleaner');
-  
+
   // 1. TẠP VỤ: Auto rửa ly khi ly dơ trong bồn > 8 ly
   const totalDirty = GameState.inventory.glasses.small.dirty +
     GameState.inventory.glasses.medium.dirty +
     GameState.inventory.glasses.large.dirty;
-  
+
   if (hasCleaner && totalDirty > 8 && !GameState.isWashing) {
     handleWashGlassesInstant();
   }
-  
+
   // 2. PHỤC VỤ: Auto lấy ly sạch đúng theo đơn order của khách
   if (hasWaiter && GameState.currentOrder && !GameState.selectedGlassType) {
     const requiredGlassKey = GameState.currentOrder.glass.id;
@@ -564,7 +587,7 @@ function runStaffAutomation() {
       handleSelectGlass(requiredGlassKey);
     }
   }
-  
+
   // 3. BARTENDER: Auto rót chuẩn & ra bia ngay sau khi đã có ly
   if (hasBartender && GameState.currentOrder && GameState.selectedGlassType && !GameState.isPouring) {
     if (GameState.attachedKegMl >= GameState.currentOrder.glass.capacityMl) {
@@ -585,3 +608,120 @@ function handleWashGlassesInstant() {
   UI.renderInventory(GameState.inventory, GameState.attachedKegMl);
   UI.renderStatus("⚡ Tạp vụ đã tự động rửa sạch toàn bộ ly!", "#2196f3");
 }
+
+function bindAuthEvents() {
+  const { tabLoginBtn, tabRegisterBtn, authSubmitBtn, authForm, authErrorMsg, logoutBtn, openAdminBtn, closeAdminBtn, authGoogleBtn } = UI.elements;
+
+  if (authGoogleBtn) {
+    authGoogleBtn.addEventListener('click', async () => {
+      try {
+        if (authErrorMsg) authErrorMsg.classList.add('hidden');
+        await FirebaseService.loginWithGoogle();
+      } catch (err) {
+        if (authErrorMsg) {
+          authErrorMsg.innerText = err.message || "Lỗi đăng nhập Google!";
+          authErrorMsg.classList.remove('hidden');
+        }
+      }
+    });
+  }
+
+  // Chuyển Tab Đăng Nhập / Đăng Ký
+  if (tabLoginBtn) {
+    tabLoginBtn.addEventListener('click', () => {
+      currentAuthMode = 'login';
+      tabLoginBtn.classList.add('active');
+      tabRegisterBtn.classList.remove('active');
+      authSubmitBtn.innerText = "🔑 ĐĂNG NHẬP";
+      authErrorMsg.classList.add('hidden');
+    });
+  }
+
+  if (tabRegisterBtn) {
+    tabRegisterBtn.addEventListener('click', () => {
+      currentAuthMode = 'register';
+      tabRegisterBtn.classList.add('active');
+      tabLoginBtn.classList.remove('active');
+      authSubmitBtn.innerText = "📝 ĐĂNG KÝ TÀI KHOẢN";
+      authErrorMsg.classList.add('hidden');
+    });
+  }
+
+  // Submit Form Đăng nhập / Đăng ký
+  if (authForm) {
+    authForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = UI.elements.authUsername.value;
+      const password = UI.elements.authPassword.value;
+      authErrorMsg.classList.add('hidden');
+
+      try {
+        if (currentAuthMode === 'register') {
+          await FirebaseService.register(username, password);
+        } else {
+          await FirebaseService.login(username, password);
+        }
+      } catch (err) {
+        authErrorMsg.innerText = err.message || "Lỗi đăng nhập!";
+        authErrorMsg.classList.remove('hidden');
+      }
+    });
+  }
+
+  // Đăng xuất
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
+      await FirebaseService.logout();
+    });
+  }
+
+  // Bảng Admin
+  if (openAdminBtn) {
+    openAdminBtn.addEventListener('click', async () => {
+      UI.elements.adminModal.classList.remove('hidden');
+      await renderAdminPlayersList();
+    });
+  }
+  if (closeAdminBtn) {
+    closeAdminBtn.addEventListener('click', () => UI.elements.adminModal.classList.add('hidden'));
+  }
+}
+
+// Render danh sách tài khoản cho Admin
+async function renderAdminPlayersList() {
+  const container = UI.elements.adminPlayersList;
+  container.innerHTML = "Đang tải...";
+  const players = await FirebaseService.getAllPlayers();
+  
+  const keys = Object.keys(players);
+  if (keys.length === 0) {
+    container.innerHTML = "Chưa có người chơi nào.";
+    return;
+  }
+
+  container.innerHTML = keys.map(uid => {
+    const p = players[uid];
+    return `
+      <div class="admin-player-card">
+        <div><b>Tên:</b> ${p.username} (${p.role || 'player'})</div>
+        <div><b>Coin:</b> ${p.coins} | <b>Ngày:</b> ${p.day}</div>
+        <div style="margin-top:6px; display:flex; gap:6px;">
+          <button style="background:#4caf50; color:white; border:none; padding:4px 8px; border-radius:4px;" onclick="adminAddCoins('${uid}', ${p.coins + 500})">+500 Coin</button>
+          <button style="background:#f44336; color:white; border:none; padding:4px 8px; border-radius:4px;" onclick="adminDeletePlayer('${uid}')">🗑️ Xóa Tài Khoản</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+window.adminDeletePlayer = async function(uid) {
+  if (confirm("Anh có chắc muốn xóa vĩnh viễn tài khoản này không?")) {
+    await FirebaseService.deletePlayer(uid);
+    await renderAdminPlayersList();
+  }
+};
+
+window.adminAddCoins = async function(uid, newCoins) {
+  await FirebaseService.updatePlayerCoins(uid, newCoins);
+  await renderAdminPlayersList();
+};

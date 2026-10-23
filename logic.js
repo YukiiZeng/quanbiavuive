@@ -14,9 +14,9 @@ const GameConfig = {
 };
 
 const GlassTypes = {
-  small: { id: 'small', name: 'Ly Nhỏ', capacityMl: 250, price: 15, class: 'glass-small', speedMultiplier: 1.35 },
-  medium: { id: 'medium', name: 'Ly Vừa', capacityMl: 300, price: 25, class: 'glass-medium', speedMultiplier: 1.0 },
-  large: { id: 'large', name: 'Ly Lớn', capacityMl: 500, price: 35, class: 'glass-large', speedMultiplier: 0.75 }
+  small: { id: 'small', name: 'Ly Nhỏ', capacityMl: 250, price: 15, class: 'glass-small', speedMultiplier: 1.35, iconPath: 'assets/icon/s-glass.png' },
+  medium: { id: 'medium', name: 'Ly Vừa', capacityMl: 300, price: 25, class: 'glass-medium', speedMultiplier: 1.0, iconPath: 'assets/icon/m-glass.png' },
+  large: { id: 'large', name: 'Ly Lớn', capacityMl: 500, price: 35, class: 'glass-large', speedMultiplier: 0.75, iconPath: 'assets/icon/l-glass.png' }
 };
 
 
@@ -107,7 +107,7 @@ const GameLogic = {
   StaffRoles: {
     waiter: { id: 'waiter', name: 'Phục Vụ', wagePerHour: 12, wagePerDay: 108, icon: '🏃' },
     bartender: { id: 'bartender', name: 'Bartender', wagePerHour: 16, wagePerDay: 144, icon: '🍺' },
-    cleaner: { id: 'cleaner', name: 'Tạp Vụ', wagePerHour: 10, wagePerDay: 90, icon: '🧽' }
+    cleaner: { id: 'cleaner', name: 'Tạp Vụ', wagePerHour: 10, wagePerDay: 90, icon: '🧽' } 
   },
   
   generateRandomCandidate() {
