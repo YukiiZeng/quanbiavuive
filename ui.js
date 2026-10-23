@@ -3,7 +3,7 @@
 const UI = {
   elements: {},
   
-    init() {
+  init() {
     this.elements = {
       moneyDisplay: document.getElementById('money-display'),
       statusDisplay: document.getElementById('status-display'),
@@ -28,7 +28,7 @@ const UI = {
       gameView: document.getElementById('game-view'),
       homeCoins: document.getElementById('home-coins'),
       homeDay: document.getElementById('home-day'),
-
+      
       // MODALS & BUTTONS
       shopModal: document.getElementById('shop-modal'),
       invModal: document.getElementById('inventory-modal'),
@@ -37,13 +37,13 @@ const UI = {
       shopMediumCount: document.getElementById('shop-medium-glass-count'),
       shopLargeCount: document.getElementById('shop-large-glass-count'),
       shopKegCount: document.getElementById('shop-keg-count'),
-
+      
       invSmallCount: document.getElementById('inv-small-glass-count'),
       invMediumCount: document.getElementById('inv-medium-glass-count'),
       invLargeCount: document.getElementById('inv-large-glass-count'),
       invKegCount: document.getElementById('inv-keg-count'),
       invKegMl: document.getElementById('inv-keg-ml'),
-
+      
       cleanSmallCount: document.getElementById('clean-small-count'),
       cleanMediumCount: document.getElementById('clean-medium-count'),
       cleanLargeCount: document.getElementById('clean-large-count'),
@@ -58,10 +58,18 @@ const UI = {
       
       washBtn: document.getElementById('wash-btn'),
       washProgressBar: document.getElementById('wash-progress-bar'),
-      washProgressFill: document.getElementById('wash-progress-fill')
+      washProgressFill: document.getElementById('wash-progress-fill'),
+      // Thêm vào trong UI.elements trong hàm init():
+      staffModal: document.getElementById('staff-modal'),
+      openStaffBtn: document.getElementById('open-staff-btn'),
+      closeStaffBtn: document.getElementById('close-staff-btn'),
+      candidatesList: document.getElementById('candidates-list'),
+      hiredStaffList: document.getElementById('hired-staff-list'),
+      staffCountBadge: document.getElementById('staff-count-badge'),
+      
     };
   },
-
+  
   
   renderOrder(order) {
     if (!order) {
@@ -93,7 +101,7 @@ const UI = {
     this.triggerPhaserUpdate();
   },
   
-    // SỬA HÀM NÀY TRONG ui.js (Tắt/bật tia bia triệt để)
+  // SỬA HÀM NÀY TRONG ui.js (Tắt/bật tia bia triệt để)
   setPouringState(isPouring) {
     const stageSection = this.elements.stageSection || document.getElementById('stage-section');
     const tapMachine = document.getElementById('tap-machine');
@@ -106,7 +114,7 @@ const UI = {
       if (tapMachine) tapMachine.classList.remove('pouring');
     }
   },
-
+  
   // BỔ SUNG HÀM NÀY VÀO ui.js (Ẩn/Hiện ly bia trong vòi)
   toggleGlassWrapper(show) {
     const glassWrapper = document.getElementById('glass-wrapper');
@@ -118,8 +126,8 @@ const UI = {
       }
     }
   },
-
-    // BỔ SUNG HÀM NÀY VÀO TRONG ĐỐI TƯỢNG UI Ở FILE ui.js
+  
+  // BỔ SUNG HÀM NÀY VÀO TRONG ĐỐI TƯỢNG UI Ở FILE ui.js
   setupPourGlassView(glassTypeKey, order) {
     const glass = GlassTypes[glassTypeKey];
     if (this.elements.glassContainer && glass) {
@@ -131,7 +139,7 @@ const UI = {
     }
     this.renderBeerLevel(0);
   },
-
+  
   renderMoney(moneyText) {
     if (this.elements.moneyDisplay) {
       this.elements.moneyDisplay.innerText = moneyText;
@@ -246,17 +254,17 @@ const UI = {
       this.elements.postPourActions.classList.add('hidden');
     }
   },
-    // BỔ SUNG VÀO CUỐI ĐỐI TƯỢNG UI TRONG ui.js
-    renderHomeData(state) {
+  // BỔ SUNG VÀO CUỐI ĐỐI TƯỢNG UI TRONG ui.js
+  renderHomeData(state) {
     if (this.elements.homeCoins) this.elements.homeCoins.innerText = state.coins;
     if (this.elements.homeDay) this.elements.homeDay.innerText = `Ngày ${state.day}`;
-
+    
     // Render Modal Cửa Hàng
     if (this.elements.shopKegCount) this.elements.shopKegCount.innerText = state.inventory.kegs;
     if (this.elements.shopSmallCount) this.elements.shopSmallCount.innerText = state.inventory.glasses.small.clean + state.inventory.glasses.small.dirty;
     if (this.elements.shopMediumCount) this.elements.shopMediumCount.innerText = state.inventory.glasses.medium.clean + state.inventory.glasses.medium.dirty;
     if (this.elements.shopLargeCount) this.elements.shopLargeCount.innerText = state.inventory.glasses.large.clean + state.inventory.glasses.large.dirty;
-
+    
     // Render Modal Kho Hàng
     if (this.elements.invKegCount) this.elements.invKegCount.innerText = state.inventory.kegs;
     if (this.elements.invKegMl) this.elements.invKegMl.innerText = state.attachedKegMl;
@@ -264,10 +272,62 @@ const UI = {
     if (this.elements.invMediumCount) this.elements.invMediumCount.innerText = state.inventory.glasses.medium.clean + state.inventory.glasses.medium.dirty;
     if (this.elements.invLargeCount) this.elements.invLargeCount.innerText = state.inventory.glasses.large.clean + state.inventory.glasses.large.dirty;
   },
-
-
+  
+  
   renderOrderInfo(order) {
     this.renderOrder(order);
   },
-
+  // Bổ sung vào cuối đối tượng UI:
+  renderStaffLists(staffData, onHire, onFire) {
+    if (this.elements.staffCountBadge) {
+      this.elements.staffCountBadge.innerText = staffData.hired.length;
+    }
+    
+    // Render danh sách Ứng viên tuyển dụng
+    if (this.elements.candidatesList) {
+      if (staffData.candidates.length === 0) {
+        this.elements.candidatesList.innerHTML = `<div class="incoming-notice">Hiện chưa có ứng viên mới!</div>`;
+      } else {
+        this.elements.candidatesList.innerHTML = staffData.candidates.map((c, index) => `
+          <div class="staff-card">
+            <div class="staff-info-header">
+              <span class="staff-name">👤 ${c.name} (${c.gender}, ${c.age}t)</span>
+              <span class="staff-role-badge">${c.roleName}</span>
+            </div>
+            <div class="staff-sub-info">
+              <span> Lương: <b>${c.wagePerDay} Coin/ngày</b> (${c.wagePerHour}c/h)</span>
+            </div>
+            <div class="staff-action-row">
+              <span style="font-size:0.7rem; color:#757575;">Thể lực: ${c.stamina}/${c.maxStamina}</span>
+              <button class="hire-btn" onclick="handleHireStaff(${index})">Tuyển Dụng</button>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+    
+    // Render danh sách Nhân viên đang làm
+    if (this.elements.hiredStaffList) {
+      if (staffData.hired.length === 0) {
+        this.elements.hiredStaffList.innerHTML = `<div class="incoming-notice">Chưa tuyển nhân viên nào.</div>`;
+      } else {
+        this.elements.hiredStaffList.innerHTML = staffData.hired.map((h, index) => `
+          <div class="staff-card">
+            <div class="staff-info-header">
+              <span class="staff-name">👤 ${h.name} (${h.gender}, ${h.age}t)</span>
+              <span class="staff-role-badge">${h.roleName}</span>
+            </div>
+            <div class="staff-sub-info">
+              <span>Lương: <b>${h.wagePerDay} Coin/ngày</b></span>
+              <button class="fire-btn" onclick="handleFireStaff(${index})">Sa Thải</button>
+            </div>
+            <div style="font-size:0.7rem; color:#616161;">Tình trạng thể lực (${h.stamina}%):</div>
+            <div class="stamina-bar-container">
+              <div class="stamina-bar-fill" style="width: ${h.stamina}%;"></div>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+  },
 };

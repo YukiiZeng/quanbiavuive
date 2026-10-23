@@ -24,12 +24,22 @@
       </div>
       
       <!-- KHU VỰC CÁC NÚT BẤM CHÍNH TRÊN TRANG CHỦ -->
+      <!-- Trong div class="home-main-actions" -->
       <div class="home-main-actions">
         <button class="home-menu-btn shop-menu-btn" id="open-shop-btn">
           <span class="btn-icon">🛒</span>
           <div class="btn-text">
             <span class="title">CỬA HÀNG</span>
             <span class="sub">Mua thêm ly & bom bia</span>
+          </div>
+        </button>
+        
+        <!-- THÊM NÚT NHÂN SỰ VÀO ĐÂY -->
+        <button class="home-menu-btn staff-menu-btn" id="open-staff-btn">
+          <span class="btn-icon">👔</span>
+          <div class="btn-text">
+            <span class="title">NHÂN SỰ</span>
+            <span class="sub">Tuyển & quản lý nhân viên</span>
           </div>
         </button>
         
@@ -41,6 +51,7 @@
           </div>
         </button>
       </div>
+      
       
       <button class="start-day-btn" id="start-day-btn">🚀 BẮT ĐẦU NGÀY MỚI</button>
     </div>
@@ -160,7 +171,33 @@
       </div>
     </div>
     
-    
+        <!-- MODAL 3: QUẢN LÝ NHÂN SỰ -->
+    <div class="modal-overlay hidden" id="staff-modal">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h3>👔 QUẢN LÝ NHÂN SỰ</h3>
+          <button class="close-modal-btn" id="close-staff-btn">✖</button>
+        </div>
+
+        <div class="modal-tabs">
+          <button class="modal-tab-btn active" id="staff-tab-btn-hire">🎯 Tuyển Nhân Viên</button>
+          <button class="modal-tab-btn" id="staff-tab-btn-working">👥 Đang Làm Việc (<span id="staff-count-badge">0</span>)</button>
+        </div>
+
+        <div class="modal-body">
+          <!-- TAB 1: TUYỂN DỤNG -->
+          <div class="modal-tab-content" id="staff-tab-hire">
+            <div id="candidates-list"></div>
+          </div>
+
+          <!-- TAB 2: NHÂN VIÊN ĐANG LÀM -->
+          <div class="modal-tab-content hidden" id="staff-tab-working">
+            <div id="hired-staff-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     
     <!-- VIEW 2: GAMEPLAY (SỬA LẠI KHU VỰC NỬA DƯỚI STAGE) -->
     <div class="view-screen hidden" id="game-view">

@@ -1,22 +1,24 @@
 // logic.js - Thuật toán tạo Đơn Khách & Tính Thưởng Coin
 
+// Thay thế đoạn khai báo GameConfig và GlassTypes cũ bằng đoạn này:
 const GameConfig = {
   BASE_REWARD: 8,
   START_HOUR: 15,
   END_HOUR: 24,
   TIME_SCALE_MS: 1500,
   KEG_VOLUME_ML: 19000,
-  KEG_PRICE: 50,
+  KEG_PRICE: 200, // Cập nhật giá bom bia = 200 Coin
   KEG_EXPRESS_FEE: 20,
   GLASS_PACK_QTY: 5,
   GLASS_PACK_PRICES: { small: 15, medium: 20, large: 30 }
 };
 
 const GlassTypes = {
-  small: { id: 'small', name: 'Ly Nhỏ', capacityMl: 250, class: 'glass-small', speedMultiplier: 1.35 },
-  medium: { id: 'medium', name: 'Ly Vừa', capacityMl: 300, class: 'glass-medium', speedMultiplier: 1.0 },
-  large: { id: 'large', name: 'Ly Lớn', capacityMl: 500, class: 'glass-large', speedMultiplier: 0.75 }
+  small: { id: 'small', name: 'Ly Nhỏ', capacityMl: 250, price: 15, class: 'glass-small', speedMultiplier: 1.35 },
+  medium: { id: 'medium', name: 'Ly Vừa', capacityMl: 300, price: 25, class: 'glass-medium', speedMultiplier: 1.0 },
+  large: { id: 'large', name: 'Ly Lớn', capacityMl: 500, price: 35, class: 'glass-large', speedMultiplier: 0.75 }
 };
+
 
 
 // Danh sách loại khách hàng ngẫu nhiên
@@ -64,25 +66,27 @@ const GameLogic = {
     return `${hStr}:${mStr}`;
   },
   // Tính số Coin nhận được dựa theo kết quả rót và Đơn của khách
+  // Thay thế hàm calculatePourResult trong GameLogic:
   calculatePourResult(level, order) {
     let earned = 0;
     let statusText = "";
     let statusColor = "";
+    const basePrice = order.glass.price || 15; // Lấy giá ly bia (15, 25, 35 coin)
     
     if (level >= order.targetMin && level <= order.targetMax) {
-      earned = GameConfig.BASE_REWARD;
+      earned = basePrice;
       statusText = `Hoàn hảo! Khách thưởng full ${earned} Coin!`;
       statusColor = "#4caf50";
     }
     else if (level < order.targetMin) {
       let ratio = level / order.targetMin;
-      earned = Math.floor(GameConfig.BASE_REWARD * ratio * 0.4);
+      earned = Math.floor(basePrice * ratio * 0.5);
       statusText = `Bia bị thiếu! Khách trả ${earned} Coin...`;
       statusColor = "#ff9800";
     }
     else {
-      earned = 1; // Tràn bia phạt chỉ cho 1 Coin
-      statusText = `Tràn bọt bia! Khách càu nhàu (+1 Coin)`;
+      earned = Math.floor(basePrice * 0.2); // Tràn bia chỉ nhận 20% giá
+      statusText = `Tràn bọt bia! Khách càu nhàu (+${earned} Coin)`;
       statusColor = "#f44336";
     }
     
@@ -99,5 +103,39 @@ const GameLogic = {
     if (!glass) return 0;
     return Math.round((glass.capacityMl * pourPercent) / 100);
   },
+  // Bổ sung vào cuối GameLogic:
+  StaffRoles: {
+    waiter: { id: 'waiter', name: 'Phục Vụ', wagePerHour: 12, wagePerDay: 108, icon: '🏃' },
+    bartender: { id: 'bartender', name: 'Bartender', wagePerHour: 16, wagePerDay: 144, icon: '🍺' },
+    cleaner: { id: 'cleaner', name: 'Tạp Vụ', wagePerHour: 10, wagePerDay: 90, icon: '🧽' }
+  },
+  
+  generateRandomCandidate() {
+    const namesMale = ["Minh", "Tùng", "Cường", "Huy", "Thành", "Đạt", "Nam", "Phúc"];
+    const namesFemale = ["Hoa", "Linh", "Trang", "Nhi", "Vy", "Mai", "Thảo", "Hà"];
+    const isMale = Math.random() > 0.5;
+    const gender = isMale ? "Nam" : "Nữ";
+    const nameList = isMale ? namesMale : namesFemale;
+    const randomName = nameList[Math.floor(Math.random() * nameList.length)];
+    const age = Math.floor(Math.random() * 11) + 18; // 18 - 28 tuổi
+    
+    const roles = Object.keys(this.StaffRoles);
+    const roleKey = roles[Math.floor(Math.random() * roles.length)];
+    const roleInfo = this.StaffRoles[roleKey];
+    
+    return {
+      id: 'emp_' + Math.random().toString(36).substring(2, 9),
+      name: `${randomName}`,
+      age: age,
+      gender: gender,
+      role: roleKey,
+      roleName: roleInfo.name,
+      wagePerHour: roleInfo.wagePerHour,
+      wagePerDay: roleInfo.wagePerDay,
+      stamina: 100, // Giá trị hiện tại (cố định 100)
+      maxStamina: 100, // Giá trị tối đa
+      status: 'working' // Chuẩn bị sẵn quy tắc trạng thái sau này
+    };
+  }
   
 };
