@@ -11,188 +11,282 @@
 <body>
   
   <div class="app-container">
-  
-  <!-- VIEW 1: TRANG CHỦ / SHOP (MỚI THÊM) -->
-  <div class="view-screen" id="home-view">
-    <div class="home-header">
-      <h1>🍺 QUÁN NHẬU VUI VẺ</h1>
-      <div class="home-stats">
-        <div class="stat-card">🪙 <span id="home-coins">0</span> Coin</div>
-        <div class="stat-card">📅 <span id="home-day">Ngày 1</span></div>
-      </div>
-    </div>
-
-    <div class="home-content">
-      <div class="shop-section">
-        <h3>📦 KHO & NGUYÊN LIỆU</h3>
-        
-        <div class="shop-item">
-          <div class="item-info">
-            <span class="item-title">🛢️ Bom Bia (19L)</span>
-            <span class="item-sub">Đang có trong kho: <b id="home-keg-count">1</b> bom</span>
-          </div>
-          <button class="buy-btn" id="buy-keg-btn">Mua (50 Coin)</button>
-        </div>
-
-        <div class="shop-item">
-          <div class="item-info">
-            <span class="item-title">🥛 Ly Nhỏ (250ml)</span>
-            <span class="item-sub">Tổng sở hữu: <b id="home-small-glass-count">10</b> ly</span>
-          </div>
-          <button class="buy-btn" id="buy-small-glass-btn">Mua 5 ly (15 Coin)</button>
-        </div>
-
-        <div class="shop-item">
-          <div class="item-info">
-            <span class="item-title">🍺 Ly Vừa (300ml)</span>
-            <span class="item-sub">Tổng sở hữu: <b id="home-medium-glass-count">10</b> ly</span>
-          </div>
-          <button class="buy-btn" id="buy-medium-glass-btn">Mua 5 ly (20 Coin)</button>
-        </div>
-
-        <div class="shop-item">
-          <div class="item-info">
-            <span class="item-title">🍻 Ly Lớn (500ml)</span>
-            <span class="item-sub">Tổng sở hữu: <b id="home-large-glass-count">10</b> ly</span>
-          </div>
-          <button class="buy-btn" id="buy-large-glass-btn">Mua 5 ly (30 Coin)</button>
-        </div>
-      </div>
-
-      <div class="keg-status-box">
-        <span>⚙️ Bom bia hiện tại trong máy: <b id="home-keg-ml">19000</b> / 19000 ml</span>
-      </div>
-    </div>
-
-    <button class="start-day-btn" id="start-day-btn">🚀 BẮT ĐẦU NGÀY MỚI</button>
-  </div>
-
-
-  <!-- VIEW 2: GAMEPLAY (SỬA LẠI KHU VỰC NỬA DƯỚI STAGE) -->
-  <div class="view-screen hidden" id="game-view">
     
-    <!-- NỬA TRÊN: GIỮ NGUYÊN KHUNG HUD & PHASER CANVAS CŨ -->
-    <div class="customer-card">
-      <div class="hud-top-bar">
-        <div class="hud-left">
-          <div class="hud-badge status-badge" id="status-display">Đang tải...</div>
-          <div class="hud-badge customer-badge">
-            <span id="customer-name">👤 Chờ khách...</span>
-            <span class="queue-badge" id="queue-badge">0</span>
-          </div>
-        </div>
-        <div class="hud-right">
-          <div class="hud-badge coin-badge">🪙 <span id="money-display">0 Coin</span></div>
-          <div class="hud-badge clock-badge">⏰ <span id="day-display">Ngày 1</span> <span id="time-display">15:00</span></div>
+    <!-- VIEW 1: TRANG CHỦ (ĐÃ TỐI ƯU CẤU TRÚC LẠI) -->
+    <div class="view-screen" id="home-view">
+      <!-- KHUNG TÊN GAME & THÔNG SỐ GỌN GÀNG -->
+      <div class="home-header-frame">
+        <h1 class="game-title">🍺 QUÁN NHẬU VUI VẺ</h1>
+        <div class="stats-row">
+          <div class="stat-pill coin-pill">🪙 <span id="home-coins">0</span> Coin</div>
+          <div class="stat-pill day-pill">📅 <span id="home-day">Ngày 1</span></div>
         </div>
       </div>
-
-      <div id="phaser-customer-container"></div>
-
-      <div class="patience-bar-wrapper">
-        <div class="patience-bar" id="patience-bar"></div>
-      </div>
-    </div>
-
-    <!-- NỬA DƯỚI: THAY THẾ TOÀN BỘ SECTION STAGE-SECTION CŨ BẰNG CẤU TRÚC TAB MỚI -->
-    <section class="stage-section" id="stage-section">
       
-      <!-- THANH TAB ĐIỀU HƯỚNG -->
-      <div class="stage-nav-tabs">
-        <button class="stage-tab-btn active" id="tab-btn-glass">🥤 Chọn Ly</button>
-        <button class="stage-tab-btn" id="tab-btn-pour">🍺 Rót Bia</button>
-        <button class="stage-tab-btn" id="tab-btn-sink">🧽 Bồn Ly (<span id="dirty-total-badge">0</span>)</button>
-      </div>
-
-      <!-- TAB 1: CHỌN LY SẠCH -->
-      <div class="tab-content" id="tab-glass-content">
-        <div class="order-mini-info">
-          <span class="order-desc" id="order-desc">Khách đang chờ gọi món...</span>
-        </div>
-        <div class="glass-selection-grid">
-          <button class="glass-select-btn" id="select-small-btn">
-            <span class="glass-title">🥛 Ly Nhỏ (250ml)</span>
-            <span class="glass-stock">Còn: <b id="clean-small-count">10</b> ly sạch</span>
-          </button>
-          <button class="glass-select-btn" id="select-medium-btn">
-            <span class="glass-title">🍺 Ly Vừa (300ml)</span>
-            <span class="glass-stock">Còn: <b id="clean-medium-count">10</b> ly sạch</span>
-          </button>
-          <button class="glass-select-btn" id="select-large-btn">
-            <span class="glass-title">🍻 Ly Lớn (500ml)</span>
-            <span class="glass-stock">Còn: <b id="clean-large-count">10</b> ly sạch</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- TAB 2: KHU VỰC RÓT BIA -->
-      <div class="tab-content hidden" id="tab-pour-content">
-        <div class="beer-tap-machine" id="tap-machine">
-          <div class="tap-top"></div>
-          <div class="tap-body"></div>
-          <div class="tap-handle"></div>
-          <div class="tap-nozzle">
-            <div class="beer-stream" id="beer-stream"></div>
+      <!-- KHU VỰC CÁC NÚT BẤM CHÍNH TRÊN TRANG CHỦ -->
+      <div class="home-main-actions">
+        <button class="home-menu-btn shop-menu-btn" id="open-shop-btn">
+          <span class="btn-icon">🛒</span>
+          <div class="btn-text">
+            <span class="title">CỬA HÀNG</span>
+            <span class="sub">Mua thêm ly & bom bia</span>
           </div>
+        </button>
+        
+        <button class="home-menu-btn inv-menu-btn" id="open-inventory-btn">
+          <span class="btn-icon">📦</span>
+          <div class="btn-text">
+            <span class="title">KHO HÀNG</span>
+            <span class="sub">Xem tài sản & bia trong máy</span>
+          </div>
+        </button>
+      </div>
+      
+      <button class="start-day-btn" id="start-day-btn">🚀 BẮT ĐẦU NGÀY MỚI</button>
+    </div>
+    
+    
+    <!-- MODAL 1: CỬA HÀNG (SHOP) -->
+    <div class="modal-overlay hidden" id="shop-modal">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h3>🛒 CỬA HÀNG NGUYÊN LIỆU</h3>
+          <button class="close-modal-btn" id="close-shop-btn">✖</button>
         </div>
-
-        <div class="glass-wrapper" id="glass-wrapper">
-          <div class="glass-container glass-medium" id="glass-container">
-            <div class="target-zone" id="target-zone">VÙNG VÀNG</div>
-            <div class="beer-liquid" id="beer-liquid">
-              <div class="beer-foam"></div>
+        
+        <!-- TABS CỬA HÀNG -->
+        <div class="modal-tabs">
+          <button class="modal-tab-btn active" id="shop-tab-btn-glass">🥤 Ly Bia</button>
+          <button class="modal-tab-btn" id="shop-tab-btn-beer">🛢️ Bia</button>
+          <button class="modal-tab-btn" id="shop-tab-btn-incoming">🚚 Đang Nhập</button>
+        </div>
+        
+        <!-- NỘI DUNG TABS CỬA HÀNG -->
+        <div class="modal-body">
+          <!-- TAB LY -->
+          <div class="modal-tab-content" id="shop-tab-glass">
+            <div class="shop-item">
+              <div class="item-info">
+                <span class="item-title">🥛 Ly Nhỏ (250ml)</span>
+                <span class="item-sub">Đang có: <b id="shop-small-glass-count">10</b> ly</span>
+              </div>
+              <button class="buy-btn" id="buy-small-glass-btn">Mua 5 ly (15 Coin)</button>
+            </div>
+            
+            <div class="shop-item">
+              <div class="item-info">
+                <span class="item-title">🍺 Ly Vừa (300ml)</span>
+                <span class="item-sub">Đang có: <b id="shop-medium-glass-count">10</b> ly</span>
+              </div>
+              <button class="buy-btn" id="buy-medium-glass-btn">Mua 5 ly (20 Coin)</button>
+            </div>
+            
+            <div class="shop-item">
+              <div class="item-info">
+                <span class="item-title">🍻 Ly Lớn (500ml)</span>
+                <span class="item-sub">Đang có: <b id="shop-large-glass-count">10</b> ly</span>
+              </div>
+              <button class="buy-btn" id="buy-large-glass-btn">Mua 5 ly (30 Coin)</button>
             </div>
           </div>
-          <div class="glass-handle" id="glass-handle"></div>
-        </div>
-
-        <div class="keg-live-info">
-          <span>🛢️ Bia trong máy: <b id="live-keg-ml">19000</b> ml</span>
-          <button class="change-keg-btn" id="change-keg-btn">🔄 Thay Bom (3s)</button>
-        </div>
-
-        <div class="pour-action-container">
-          <button class="pour-btn" id="pour-btn">
-            <span class="btn-icon">🍺</span>
-            <span class="btn-text">GIỮ ĐỂ RÓT BIA</span>
-          </button>
-
-          <div class="post-pour-actions hidden" id="post-pour-actions">
-            <button class="serve-btn" id="serve-btn">✅ RA BIA</button>
-            <button class="discard-btn" id="discard-btn">🗑️ ĐỔ BỎ</button>
+          
+          <!-- TAB BIA -->
+          <div class="modal-tab-content hidden" id="shop-tab-beer">
+            <div class="shop-item">
+              <div class="item-info">
+                <span class="item-title">🛢️ Bom Bia (19L)</span>
+                <span class="item-sub">Kho đang có: <b id="shop-keg-count">1</b> bom</span>
+              </div>
+              <button class="buy-btn" id="buy-keg-btn">Mua (50 Coin)</button>
+            </div>
+          </div>
+          
+          <!-- TAB ĐANG NHẬP HÀNG -->
+          <div class="modal-tab-content hidden" id="shop-tab-incoming">
+            <div class="incoming-notice">
+              <span>🚚 Đang nhập hàng mới về...</span>
+              <p>Các vật phẩm & công cụ mới sẽ sớm có mặt!</p>
+            </div>
           </div>
         </div>
       </div>
-
-      <!-- TAB 3: BỒN RỬA LY DƠ -->
-      <div class="tab-content hidden" id="tab-sink-content">
-        <div class="sink-status-box">
-          <h4>🧽 Ly Dơ Cần Rửa</h4>
-          <div class="dirty-list">
-            <div>🥛 Ly nhỏ dơ: <b id="dirty-small-count">0</b></div>
-            <div>🍺 Ly vừa dơ: <b id="dirty-medium-count">0</b></div>
-            <div>🍻 Ly lớn dơ: <b id="dirty-large-count">0</b></div>
+    </div>
+    
+    
+    <!-- MODAL 2: KHO HÀNG (INVENTORY) -->
+    <div class="modal-overlay hidden" id="inventory-modal">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h3>📦 KHO HÀNG CỦA QUÁN</h3>
+          <button class="close-modal-btn" id="close-inv-btn">✖</button>
+        </div>
+        
+        <!-- TABS KHO HÀNG -->
+        <div class="modal-tabs">
+          <button class="modal-tab-btn active" id="inv-tab-btn-glass">🥤 Tồn Kho Ly</button>
+          <button class="modal-tab-btn" id="inv-tab-btn-beer">🛢️ Tồn Kho Bia</button>
+        </div>
+        
+        <!-- NỘI DUNG TABS KHO HÀNG -->
+        <div class="modal-body">
+          <!-- TAB LY -->
+          <div class="modal-tab-content" id="inv-tab-glass">
+            <div class="inventory-status-item">
+              <span>🥛 Ly Nhỏ (250ml)</span>
+              <b><span id="inv-small-glass-count">10</span> ly</b>
+            </div>
+            <div class="inventory-status-item">
+              <span>🍺 Ly Vừa (300ml)</span>
+              <b><span id="inv-medium-glass-count">10</span> ly</b>
+            </div>
+            <div class="inventory-status-item">
+              <span>🍻 Ly Lớn (500ml)</span>
+              <b><span id="inv-large-glass-count">10</span> ly</b>
+            </div>
+          </div>
+          
+          <!-- TAB BIA -->
+          <div class="modal-tab-content hidden" id="inv-tab-beer">
+            <div class="inventory-status-item">
+              <span>🛢️ Bom bia dự trữ trong kho</span>
+              <b><span id="inv-keg-count">1</span> bom</b>
+            </div>
+            <div class="keg-live-status">
+              <span>⚙️ Dung tích bia trong vòi hiện tại:</span>
+              <h4><span id="inv-keg-ml">19000</span> / 19000 ml</h4>
+            </div>
           </div>
         </div>
-
-        <button class="wash-btn" id="wash-btn">🚿 RỬA TẤT CẢ LY (5 Giây)</button>
-        <div class="wash-progress-bar hidden" id="wash-progress-bar">
-          <div class="wash-progress-fill" id="wash-progress-fill"></div>
+      </div>
+    </div>
+    
+    
+    
+    <!-- VIEW 2: GAMEPLAY (SỬA LẠI KHU VỰC NỬA DƯỚI STAGE) -->
+    <div class="view-screen hidden" id="game-view">
+      
+      <!-- NỬA TRÊN: GIỮ NGUYÊN KHUNG HUD & PHASER CANVAS CŨ -->
+      <div class="customer-card">
+        <div class="hud-top-bar">
+          <div class="hud-left">
+            <div class="hud-badge status-badge" id="status-display">Đang tải...</div>
+            <div class="hud-badge customer-badge">
+              <span id="customer-name">👤 Chờ khách...</span>
+              <span class="queue-badge" id="queue-badge">0</span>
+            </div>
+          </div>
+          <div class="hud-right">
+            <div class="hud-badge coin-badge">🪙 <span id="money-display">0 Coin</span></div>
+            <div class="hud-badge clock-badge">⏰ <span id="day-display">Ngày 1</span> <span id="time-display">15:00</span></div>
+          </div>
+        </div>
+        
+        <div id="phaser-customer-container"></div>
+        
+        <div class="patience-bar-wrapper">
+          <div class="patience-bar" id="patience-bar"></div>
         </div>
       </div>
-
-      <!-- OVERLAY HẾT GIỜ -->
-      <div class="night-overlay hidden" id="night-overlay">
-        <h2>🌙 HẾT GIỜ LÀM VIỆC</h2>
-        <p>Đã 24:00! Quán đóng cửa kiểm kê doanh thu.</p>
-        <button class="next-day-btn" id="next-day-btn">VỀ TRANG CHỦ 🏠</button>
-      </div>
-    </section>
-
+      
+      <!-- NỬA DƯỚI: THAY THẾ TOÀN BỘ SECTION STAGE-SECTION CŨ BẰNG CẤU TRÚC TAB MỚI -->
+      <section class="stage-section" id="stage-section">
+        
+        <!-- THANH TAB ĐIỀU HƯỚNG -->
+        <div class="stage-nav-tabs">
+          <button class="stage-tab-btn active" id="tab-btn-glass">🥤 Chọn Ly</button>
+          <button class="stage-tab-btn" id="tab-btn-pour">🍺 Rót Bia</button>
+          <button class="stage-tab-btn" id="tab-btn-sink">🧽 Bồn Ly (<span id="dirty-total-badge">0</span>)</button>
+        </div>
+        
+        <!-- TAB 1: CHỌN LY SẠCH -->
+        <div class="tab-content" id="tab-glass-content">
+          <div class="order-mini-info">
+            <span class="order-desc" id="order-desc">Khách đang chờ gọi món...</span>
+          </div>
+          <div class="glass-selection-grid">
+            <button class="glass-select-btn" id="select-small-btn">
+              <span class="glass-title">🥛 Ly Nhỏ (250ml)</span>
+              <span class="glass-stock">Còn: <b id="clean-small-count">10</b> ly sạch</span>
+            </button>
+            <button class="glass-select-btn" id="select-medium-btn">
+              <span class="glass-title">🍺 Ly Vừa (300ml)</span>
+              <span class="glass-stock">Còn: <b id="clean-medium-count">10</b> ly sạch</span>
+            </button>
+            <button class="glass-select-btn" id="select-large-btn">
+              <span class="glass-title">🍻 Ly Lớn (500ml)</span>
+              <span class="glass-stock">Còn: <b id="clean-large-count">10</b> ly sạch</span>
+            </button>
+          </div>
+        </div>
+        
+        <!-- TAB 2: KHU VỰC RÓT BIA -->
+        <div class="tab-content hidden" id="tab-pour-content">
+          <div class="beer-tap-machine" id="tap-machine">
+            <div class="tap-top"></div>
+            <div class="tap-body"></div>
+            <div class="tap-handle"></div>
+            <div class="tap-nozzle">
+              <div class="beer-stream" id="beer-stream"></div>
+            </div>
+          </div>
+          
+          <div class="glass-wrapper" id="glass-wrapper">
+            <div class="glass-container glass-medium" id="glass-container">
+              <div class="target-zone" id="target-zone">VÙNG VÀNG</div>
+              <div class="beer-liquid" id="beer-liquid">
+                <div class="beer-foam"></div>
+              </div>
+            </div>
+            <div class="glass-handle" id="glass-handle"></div>
+          </div>
+          
+          <div class="keg-live-info">
+            <span>🛢️ Bia trong máy: <b id="live-keg-ml">19000</b> ml</span>
+            <button class="change-keg-btn" id="change-keg-btn">🔄 Thay Bom (3s)</button>
+          </div>
+          
+          <div class="pour-action-container">
+            <button class="pour-btn" id="pour-btn">
+              <span class="btn-icon">🍺</span>
+              <span class="btn-text">GIỮ ĐỂ RÓT BIA</span>
+            </button>
+            
+            <div class="post-pour-actions hidden" id="post-pour-actions">
+              <button class="serve-btn" id="serve-btn">✅ RA BIA</button>
+              <button class="discard-btn" id="discard-btn">🗑️ ĐỔ BỎ</button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- TAB 3: BỒN RỬA LY DƠ -->
+        <div class="tab-content hidden" id="tab-sink-content">
+          <div class="sink-status-box">
+            <h4>🧽 Ly Dơ Cần Rửa</h4>
+            <div class="dirty-list">
+              <div>🥛 Ly nhỏ dơ: <b id="dirty-small-count">0</b></div>
+              <div>🍺 Ly vừa dơ: <b id="dirty-medium-count">0</b></div>
+              <div>🍻 Ly lớn dơ: <b id="dirty-large-count">0</b></div>
+            </div>
+          </div>
+          
+          <button class="wash-btn" id="wash-btn">🚿 RỬA TẤT CẢ LY (5 Giây)</button>
+          <div class="wash-progress-bar hidden" id="wash-progress-bar">
+            <div class="wash-progress-fill" id="wash-progress-fill"></div>
+          </div>
+        </div>
+        
+        <!-- OVERLAY HẾT GIỜ -->
+        <div class="night-overlay hidden" id="night-overlay">
+          <h2>🌙 HẾT GIỜ LÀM VIỆC</h2>
+          <p>Đã 24:00! Quán đóng cửa kiểm kê doanh thu.</p>
+          <button class="next-day-btn" id="next-day-btn">VỀ TRANG CHỦ 🏠</button>
+        </div>
+      </section>
+      
+    </div>
+    
   </div>
-
-</div>
-
+  
   
   <!-- THƯ VIỆN PHASER 3 -->
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
@@ -208,4 +302,5 @@
   <script src="main.js"></script>
   
 </body>
+
 </html>

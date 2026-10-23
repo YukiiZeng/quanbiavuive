@@ -3,7 +3,7 @@
 const UI = {
   elements: {},
   
-  init() {
+    init() {
     this.elements = {
       moneyDisplay: document.getElementById('money-display'),
       statusDisplay: document.getElementById('status-display'),
@@ -28,12 +28,22 @@ const UI = {
       gameView: document.getElementById('game-view'),
       homeCoins: document.getElementById('home-coins'),
       homeDay: document.getElementById('home-day'),
-      homeKegCount: document.getElementById('home-keg-count'),
-      homeKegMl: document.getElementById('home-keg-ml'),
-      homeSmallCount: document.getElementById('home-small-glass-count'),
-      homeMediumCount: document.getElementById('home-medium-glass-count'),
-      homeLargeCount: document.getElementById('home-large-glass-count'),
+
+      // MODALS & BUTTONS
+      shopModal: document.getElementById('shop-modal'),
+      invModal: document.getElementById('inventory-modal'),
       
+      shopSmallCount: document.getElementById('shop-small-glass-count'),
+      shopMediumCount: document.getElementById('shop-medium-glass-count'),
+      shopLargeCount: document.getElementById('shop-large-glass-count'),
+      shopKegCount: document.getElementById('shop-keg-count'),
+
+      invSmallCount: document.getElementById('inv-small-glass-count'),
+      invMediumCount: document.getElementById('inv-medium-glass-count'),
+      invLargeCount: document.getElementById('inv-large-glass-count'),
+      invKegCount: document.getElementById('inv-keg-count'),
+      invKegMl: document.getElementById('inv-keg-ml'),
+
       cleanSmallCount: document.getElementById('clean-small-count'),
       cleanMediumCount: document.getElementById('clean-medium-count'),
       cleanLargeCount: document.getElementById('clean-large-count'),
@@ -49,9 +59,9 @@ const UI = {
       washBtn: document.getElementById('wash-btn'),
       washProgressBar: document.getElementById('wash-progress-bar'),
       washProgressFill: document.getElementById('wash-progress-fill')
-      
     };
   },
+
   
   renderOrder(order) {
     if (!order) {
@@ -237,15 +247,24 @@ const UI = {
     }
   },
     // BỔ SUNG VÀO CUỐI ĐỐI TƯỢNG UI TRONG ui.js
-  renderHomeData(state) {
+    renderHomeData(state) {
     if (this.elements.homeCoins) this.elements.homeCoins.innerText = state.coins;
     if (this.elements.homeDay) this.elements.homeDay.innerText = `Ngày ${state.day}`;
-    if (this.elements.homeKegCount) this.elements.homeKegCount.innerText = state.inventory.kegs;
-    if (this.elements.homeKegMl) this.elements.homeKegMl.innerText = state.attachedKegMl;
-    if (this.elements.homeSmallCount) this.elements.homeSmallCount.innerText = state.inventory.glasses.small.clean + state.inventory.glasses.small.dirty;
-    if (this.elements.homeMediumCount) this.elements.homeMediumCount.innerText = state.inventory.glasses.medium.clean + state.inventory.glasses.medium.dirty;
-    if (this.elements.homeLargeCount) this.elements.homeLargeCount.innerText = state.inventory.glasses.large.clean + state.inventory.glasses.large.dirty;
+
+    // Render Modal Cửa Hàng
+    if (this.elements.shopKegCount) this.elements.shopKegCount.innerText = state.inventory.kegs;
+    if (this.elements.shopSmallCount) this.elements.shopSmallCount.innerText = state.inventory.glasses.small.clean + state.inventory.glasses.small.dirty;
+    if (this.elements.shopMediumCount) this.elements.shopMediumCount.innerText = state.inventory.glasses.medium.clean + state.inventory.glasses.medium.dirty;
+    if (this.elements.shopLargeCount) this.elements.shopLargeCount.innerText = state.inventory.glasses.large.clean + state.inventory.glasses.large.dirty;
+
+    // Render Modal Kho Hàng
+    if (this.elements.invKegCount) this.elements.invKegCount.innerText = state.inventory.kegs;
+    if (this.elements.invKegMl) this.elements.invKegMl.innerText = state.attachedKegMl;
+    if (this.elements.invSmallCount) this.elements.invSmallCount.innerText = state.inventory.glasses.small.clean + state.inventory.glasses.small.dirty;
+    if (this.elements.invMediumCount) this.elements.invMediumCount.innerText = state.inventory.glasses.medium.clean + state.inventory.glasses.medium.dirty;
+    if (this.elements.invLargeCount) this.elements.invLargeCount.innerText = state.inventory.glasses.large.clean + state.inventory.glasses.large.dirty;
   },
+
 
   renderOrderInfo(order) {
     this.renderOrder(order);
