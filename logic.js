@@ -1,19 +1,23 @@
 // logic.js - Thuật toán tạo Đơn Khách & Tính Thưởng Coin
 
 const GameConfig = {
-  BASE_REWARD: 5,
-  START_HOUR: 15, // Mở cửa 15h
-  END_HOUR: 24, // Đóng cửa 24h
-  TIME_SCALE_MS: 1500 // 1.5 giây thực = 10 phút trong game
+  BASE_REWARD: 8,
+  START_HOUR: 15,
+  END_HOUR: 24,
+  TIME_SCALE_MS: 1500,
+  KEG_VOLUME_ML: 19000,
+  KEG_PRICE: 50,
+  KEG_EXPRESS_FEE: 20,
+  GLASS_PACK_QTY: 5,
+  GLASS_PACK_PRICES: { small: 15, medium: 20, large: 30 }
 };
 
-
-// Khai báo 3 loại ly
 const GlassTypes = {
-  small: { id: 'small', name: 'Ly Nhỏ', class: 'glass-small', speedMultiplier: 1.35 },
-  medium: { id: 'medium', name: 'Ly Vừa', class: 'glass-medium', speedMultiplier: 1.0 },
-  large: { id: 'large', name: 'Ly Lớn', class: 'glass-large', speedMultiplier: 0.75 }
+  small: { id: 'small', name: 'Ly Nhỏ', capacityMl: 250, class: 'glass-small', speedMultiplier: 1.35 },
+  medium: { id: 'medium', name: 'Ly Vừa', capacityMl: 300, class: 'glass-medium', speedMultiplier: 1.0 },
+  large: { id: 'large', name: 'Ly Lớn', capacityMl: 500, class: 'glass-large', speedMultiplier: 0.75 }
 };
+
 
 // Danh sách loại khách hàng ngẫu nhiên
 const CustomerTitles = [
@@ -23,32 +27,32 @@ const CustomerTitles = [
 
 const GameLogic = {
   // Tạo ngẫu nhiên 1 Đơn Hàng từ khách
-generateOrder() {
-  const keys = Object.keys(GlassTypes);
-  const randomGlassKey = keys[Math.floor(Math.random() * keys.length)];
-  const selectedGlass = GlassTypes[randomGlassKey];
+  generateOrder() {
+    const keys = Object.keys(GlassTypes);
+    const randomGlassKey = keys[Math.floor(Math.random() * keys.length)];
+    const selectedGlass = GlassTypes[randomGlassKey];
+    
+    const targetMin = Math.floor(Math.random() * 3) * 10 + 60;
+    const targetMax = targetMin + 10;
+    
+    const randomName = CustomerTitles[Math.floor(Math.random() * CustomerTitles.length)];
+    const patienceMax = Math.floor(Math.random() * 4) + 10;
+    
+    // Gán ngẫu nhiên 1 trong 13 NPC ảnh cho đơn hàng này
+    const npcId = Math.floor(Math.random() * 13) + 1;
+    
+    return {
+      npcId: npcId, // ID ảnh NPC cố định cho đơn hàng
+      customerName: randomName,
+      glass: selectedGlass,
+      targetMin: targetMin,
+      targetMax: targetMax,
+      patienceMax: patienceMax,
+      patienceCurrent: patienceMax,
+      description: `Muốn ${selectedGlass.name} - Rót chuẩn ${targetMin}% - ${targetMax}%`
+    };
+  },
   
-  const targetMin = Math.floor(Math.random() * 3) * 10 + 60;
-  const targetMax = targetMin + 10;
-  
-  const randomName = CustomerTitles[Math.floor(Math.random() * CustomerTitles.length)];
-  const patienceMax = Math.floor(Math.random() * 4) + 10;
-
-  // Gán ngẫu nhiên 1 trong 13 NPC ảnh cho đơn hàng này
-  const npcId = Math.floor(Math.random() * 13) + 1;
-
-  return {
-    npcId: npcId, // ID ảnh NPC cố định cho đơn hàng
-    customerName: randomName,
-    glass: selectedGlass,
-    targetMin: targetMin,
-    targetMax: targetMax,
-    patienceMax: patienceMax,
-    patienceCurrent: patienceMax,
-    description: `Muốn ${selectedGlass.name} - Rót chuẩn ${targetMin}% - ${targetMax}%`
-  };
-},
-
   // Thêm vào trong đối tượng GameLogic:
   isPeakHour(hour) {
     return hour >= 18 && hour < 21; // Cao điểm từ 18h - 21h
@@ -87,5 +91,13 @@ generateOrder() {
   
   formatCurrency(amount) {
     return `${amount} Coin`;
-  }
+  },
+  
+  // Bổ sung vào bên trong đối tượng GameLogic:
+  calculatePouredVolumeMl(glassTypeKey, pourPercent) {
+    const glass = GlassTypes[glassTypeKey];
+    if (!glass) return 0;
+    return Math.round((glass.capacityMl * pourPercent) / 100);
+  },
+  
 };
