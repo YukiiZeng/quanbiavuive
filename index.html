@@ -1,40 +1,70 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Rót Bia Quán Bar - Firebase Sync</title>
+  <title>Rót Bia Quán Bar - HD Sảnh Khách</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-
+  
   <div class="app-container">
-    <header class="header-bar">
-      <div class="stat-card">
-        <span class="stat-label">TỔNG TÀI SẢN</span>
-        <div class="money" id="money-display">0 Coin</div>
+    
+    <!-- NỬA TRÊN (50%): SẢNH KHÁCH HÀNG & HUD THÔNG TIN -->
+    <div class="customer-card" id="customer-card">
+      
+      <!-- THANH HUD NỔI ĐÈ LÊN PHASER CANVAS -->
+      <div class="hud-top-bar">
+        <div class="hud-left">
+          <div class="hud-badge status-badge" id="status-display">Đang tải...</div>
+          <div class="hud-badge customer-badge">
+            <span id="customer-name">👤 Chờ khách...</span>
+            <span class="queue-badge" id="queue-badge">0</span>
+          </div>
+        </div>
+        
+        <div class="hud-right">
+          <div class="hud-badge coin-badge">
+            <span>🪙</span>
+            <span id="money-display">0 Coin</span>
+          </div>
+          <div class="hud-badge clock-badge">
+            <span>⏰</span>
+            <span id="day-display">Ngày 1</span>
+            <span id="time-display">15:00</span>
+          </div>
+        </div>
       </div>
-      <div class="status-msg" id="status-display">Đang kết nối dữ liệu đám mây...</div>
-    </header>
 
-    <div class="customer-card">
-      <div class="customer-header">
-        <span class="customer-name" id="customer-name">👤 Khách Đang Đến...</span>
-        <span class="glass-tag" id="glass-tag">🍺 Ly Vừa</span>
+      <!-- CANVA PHASER CHÍNH (ĐỘ PHÂN GIẢI HD) -->
+      <div id="phaser-customer-container"></div>
+
+      <!-- THANH KIÊN NHẪN NẰM DƯỚI ĐÁY SẢNH -->
+      <div class="patience-bar-wrapper">
+        <div class="patience-bar" id="patience-bar"></div>
       </div>
-      <div class="order-desc" id="order-desc">Yêu cầu: Rót từ 80% - 90% ly</div>
     </div>
-
+    
+    <!-- NỬA DƯỚI (50%): SÂN KHẤU RÓT BIA & SHOP -->
     <section class="stage-section" id="stage-section">
+      
+      <!-- Dòng thông tin order mini -->
+      <div class="order-mini-info">
+        <span class="glass-tag" id="glass-tag">🍺 Ly Vừa</span>
+        <span class="order-desc" id="order-desc">Yêu cầu: Rót chuẩn 80% - 90%</span>
+      </div>
+
       <div class="beer-tap-machine" id="tap-machine">
-        <div class="tap-top"></div>          
-        <div class="tap-body"></div>         
-        <div class="tap-handle"></div>       
+        <div class="tap-top"></div>
+        <div class="tap-body"></div>
+        <div class="tap-handle"></div>
         <div class="tap-nozzle">
           <div class="beer-stream" id="beer-stream"></div>
         </div>
       </div>
-
+      
       <div class="glass-wrapper" id="glass-wrapper">
         <div class="glass-container glass-medium" id="glass-container">
           <div class="target-zone" id="target-zone">VÙNG VÀNG</div>
@@ -44,30 +74,33 @@
         </div>
         <div class="glass-handle" id="glass-handle"></div>
       </div>
-
+      
       <button class="pour-btn" id="pour-btn">
         <span class="btn-icon">🍺</span>
         <span class="btn-text">GIỮ ĐỂ RÓT BIA</span>
       </button>
+      
+      <div class="night-overlay hidden" id="night-overlay">
+        <h2>🌙 HẾT GIỜ LÀM VIỆC</h2>
+        <p>Đã 24:00! Quán bia dọn dẹp đóng cửa.</p>
+        <button class="next-day-btn" id="next-day-btn">MỞ CỬA NGÀY TIẾP THEO ☀️</button>
+      </div>
     </section>
 
-    <main class="panel-section">
-      <div class="placeholder-card">
-        <div class="card-title">⚙️ SHOP QUÁN BIA</div>
-        <p>Khu vực mở rộng vòi rót, thuê nhân viên và mở trang trí quán sẽ xuất hiện tại đây...</p>
-      </div>
-    </main>
   </div>
-
-  <!-- 1. THƯ VIỆN FIREBASE SDK (COMPAT) -->
+  
+  <!-- THƯ VIỆN PHASER 3 -->
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
+  
+  <!-- FIREBASE & LOGIC -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-
-  <!-- 2. CÁC FILE LOGIC GAME -->
+  
   <script src="firebase.js"></script>
   <script src="logic.js"></script>
   <script src="ui.js"></script>
+  <script src="phaser-view.js"></script>
   <script src="main.js"></script>
-
+  
 </body>
 </html>
